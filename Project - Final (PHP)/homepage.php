@@ -79,8 +79,13 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             background-color: #f8f9fa;
         }
 
+        h1{
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: bolder;
+            
+        }
         .navbar {
-            background-color: #2a9134;
+            background-color:#2a9134;
             color: white;
             position: sticky;
             top: 0;
@@ -105,7 +110,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         }
 
         .navbar-nav .nav-link:hover {
-            background-color: #6c757d;
+            background-color:#2a9134;
             color: #fff;
         }
 
@@ -117,7 +122,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         }
 
         .navbar .btn:hover {
-            background-color: #6c757d;
+            background-color:#34873f;
             color: #fff;
         }
 
@@ -303,7 +308,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <section class="hero-section">
         <img src="assets/Imus-Campus-scaled.jpg" alt="Graduation Image">
         <div class="overlay">
-            <h1>WELCOME TO CAVITE STATE UNIVERSITY <br> IMUS CAMPUS</h1>
+            <h1 style="font-size: 60px;">WELCOME TO CAVITE STATE UNIVERSITY <br><br> IMUS CAMPUS</h1>
         </div>
     </section>
 

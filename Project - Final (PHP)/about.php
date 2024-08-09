@@ -90,10 +90,7 @@ $row = $result->fetch_assoc();
             border: none; 
             border-radius: 5px;
         }
-        .navbar-nav .nav-link:hover {
-            background-color: #6c757d;
-            color: #fff;
-        }
+       
         .navbar .btn {
             border: 1px solid white;
             border-radius: 5px;
@@ -101,9 +98,15 @@ $row = $result->fetch_assoc();
             margin-left: 10px;
         }
         .navbar .btn:hover {
-            background-color: #6c757d;
+            background-color:#34873f;
             color: #fff;
         }
+
+    .navbar-nav .nav-link:hover {
+            background-color:#2a9134;
+            color: #fff;
+        }
+
         .user-profile {
             height: 40px;
             width: 40px;

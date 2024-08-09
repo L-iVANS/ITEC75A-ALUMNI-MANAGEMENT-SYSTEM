@@ -75,6 +75,23 @@ $result = $conn->query($sql);
             background-color: #f8f9fa;
             margin: 0;
         }
+
+        .navbar .btn:hover {
+            background-color:#34873f;
+            color: #fff;
+        }
+
+  .navbar-nav .nav-link:hover {
+            background-color:#2a9134;
+            color: #fff;
+        }
+
+    h1{
+            font-family:Verdana, Geneva, Tahoma, sans-serif;
+            font-weight: bolder;
+            
+        }
+
         .navbar {
         background-color: #2a9134; /* Hex color */
         color: white;
@@ -95,19 +112,11 @@ $result = $conn->query($sql);
         border: none; /* Removed the border */
         border-radius: 5px;
     }
-    .navbar-nav .nav-link:hover {
-        background-color: #6c757d;
-        color: #fff;
-    }
     .navbar .btn {
         border: 1px solid white;
         border-radius: 5px;
         color: white;
         margin-left: 10px;
-    }
-    .navbar .btn:hover {
-        background-color: #6c757d;
-        color: #fff;
     }
     .user-profile {
         height: 40px;

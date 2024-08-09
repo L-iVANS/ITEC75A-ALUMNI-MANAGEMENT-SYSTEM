@@ -79,6 +79,18 @@ $row = $result->fetch_assoc();
             z-index: 1000;
         }
 
+        .navbar .btn:hover {
+            background-color:#34873f;
+            color: #fff;
+        }
+
+  .navbar-nav .nav-link:hover {
+            background-color:#2a9134;
+            color: #fff;
+        }
+
+
+
         .navbar-brand img {
             height: 70px;
             margin-top: -10px;
@@ -96,21 +108,12 @@ $row = $result->fetch_assoc();
             border-radius: 5px;
         }
 
-        .navbar-nav .nav-link:hover {
-            background-color: #6c757d;
-            color: #fff;
-        }
-
+     
         .navbar .btn {
             border: 1px solid white;
             border-radius: 5px;
             color: white;
             margin-left: 10px;
-        }
-
-        .navbar .btn:hover {
-            background-color: #6c757d;
-            color: #fff;
         }
 
         .user-profile {
