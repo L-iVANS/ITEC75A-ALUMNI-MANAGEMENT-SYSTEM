@@ -64,7 +64,7 @@ form {
 }
 
 h1 {
-    color: var(--grad-clr1);
+    color: rgba(31, 29, 29, 0.836);
 }
 
 span {
@@ -124,8 +124,8 @@ a.forgot {
 
 button {
     border-radius: 20px;
-    border: 1px solid var(--grad-clr1);
-    color: #FFF;
+    border: 1px solid #ffc107;
+    color: rgba(31, 29, 29, 0.836);
     font-size: 12px;
     font-weight: bold;
     padding: 12px 45px;
@@ -141,7 +141,7 @@ button {
 
 .form-container button:hover {
     background: #FFF;
-    color: var(--grad-clr1);
+    color: #ffc107;
 }
 
 .overlay-container {
@@ -205,7 +205,8 @@ p {
 
 button.ghost {
     background-color: transparent;
-    border-color: #dada18;
+    border-color: #ffc107;
+    color:#fff;
 }
 
 .right-panel-active .log-in-container {
