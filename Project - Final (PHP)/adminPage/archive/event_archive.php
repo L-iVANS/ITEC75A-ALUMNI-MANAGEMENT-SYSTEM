@@ -20,7 +20,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     if ($user_result->num_rows > 0) {
         // User is an admin
         $user = $user_result->fetch_assoc();
-        
     }
     $stmt->close();
 
@@ -49,7 +48,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         exit();
     }
     $stmt->close();
-    
 } else {
     header('Location: ../../homepage.php');
     exit();
@@ -222,7 +220,7 @@ if (isset($_GET['ide'])) {
 
         <div class="side-content">
             <div class="profile">
-            <i class="bi bi-person-circle"></i>
+                <i class="bi bi-person-circle"></i>
                 <h4><?php echo $user['fname']; ?></h4>
                 <small style="color: white;"><?php echo $user['email']; ?></small>
                 <!-- <h4>ADMIN</h4>
@@ -336,9 +334,9 @@ if (isset($_GET['ide'])) {
                             </div>
                             <div class="col" style="text-align: end;">
                                 <div class="add-button">
-                                    <a class='btn btn-light border border-dark' href='./alumni_archive.php' style="padding-left: 48px; padding-right: 48px; margin-right: 1%;">Alumni</a>
-                                    <a class='btn btn-light border border-dark' href='./coor_archive.php' style="padding-left: 30.7px; padding-right: 30.7px; margin-right: 1%;">Coordinator</a>
-                                    <a class='btn btn-secondary border border-dark' href='./event_archive.php' style="padding-left: 52px; padding-right: 52px;">Event</a>
+                                    <a class='btn btn-warning border border-warning btn active" data-bs-toggle="button" aria-pressed="true"' href='./alumni_archive.php' style="padding-left: 48px; padding-right: 48px; margin-right: 1%;">Alumni</a>
+                                    <a class='btn btn-warning border border-warning' href='./coor_archive.php' style="padding-left: 30.7px; padding-right: 30.7px; margin-right: 1%;">Coordinator</a>
+                                    <a class='btn btn-warning border border-warning' href='./event_archive.php' style="padding-left: 52px; padding-right: 52px;">Event</a>
                                 </div>
                             </div>
                         </div>
@@ -363,12 +361,12 @@ if (isset($_GET['ide'])) {
                                 <?php
                                 if ($result->num_rows > 0) {
                                     while ($row = $result->fetch_assoc()) {
-                                        
+
                                 ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['event_id'] ?></td>
                                             <td class="inline"><?php echo $row['title'] ?></td>
-                                            <td class="inline"><?php echo $row['schedule']?></td>
+                                            <td class="inline"><?php echo $row['schedule'] ?></td>
                                             <td class="inline"><?php echo $row['description'] ?></td>
                                             <td class="inline"><?php echo $row['going'] ?></td>
                                             <td class="inline"><?php echo $row['interested'] ?></td>
