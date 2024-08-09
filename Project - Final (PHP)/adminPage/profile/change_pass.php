@@ -257,7 +257,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <input type="text" name="currentPass" class="form-control" id="formGroupExampleInput" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="formGroupExampleInput2" class="form-label">New Password</label>
+                                    <label for="formGroupExampleInput2" class="form-label">Enter New Password</label>
                                     <input type="password" name="newPass" class="form-control" id="formGroupExampleInput2" required>
                                 </div>
                                 <div class="mb-3">

@@ -382,7 +382,6 @@ if (isset($_GET['ide'])) {
                                             <?php
                                             echo "
                                                 <td class='inline act'>
-                                                    <a class='btn btn-warning btn-sm' href='./update_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Update</a>
                                                     <a class='btn btn-danger btn-sm archive' href='./del_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Archive</a>
                                                     <a class='btn btn-info btn-sm' href='./alumni_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>More Info</a>
                                                 </td>

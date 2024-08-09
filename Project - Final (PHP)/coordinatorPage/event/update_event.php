@@ -341,8 +341,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                     title: 'Do you want to continue?',
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#e03444',
-                    cancelButtonColor: '#ffc404',
+                    confirmButtonColor: '#ffc404',
+                    cancelButtonColor: '#e03444',
                     confirmButtonText: 'Submit'
                 })
                 .then((result) => {

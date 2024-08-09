@@ -337,8 +337,8 @@ if (isset($_GET['ide'])) {
                             </div>
                             <div class="col" style="text-align: end;">
                                 <div class="add-button">
-                                    <a class='btn btn-secondary border border-dark' href='./alumni_archive.php' style="padding-left: 48px; padding-right: 48px; margin-right: 1%;">Alumni</a>
-                                    <a class='btn btn-light border border-dark' href='./event_archive.php' style="padding-left: 52px; padding-right: 52px;">Event</a>
+                                    <a class='btn btn-warning border border-warning' href='./alumni_archive.php' style="padding-left: 48px; padding-right: 48px; margin-right: 1%;">Alumni</a>
+                                    <a class='btn btn-light border border-light' href='./event_archive.php' style="padding-left: 52px; padding-right: 52px;">Event</a>
                                 </div>
                             </div>
                         </div>

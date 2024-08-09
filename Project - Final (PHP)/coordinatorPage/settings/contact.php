@@ -183,10 +183,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="d-flex justify-content-end my-3">
                     <ul class="nav nav-pills custom-nav-pills" id="myTab" role="tablist">
                         <li class="nav-item mx-4">
-                            <button class="btn btn-light border border-dark" id="contact-tab" type="button" role="tab" aria-controls="contact" aria-selected="false" onclick="location.href='about.php'" style="padding-left: 55px; padding-right: 55px;">About</button>
+                            <button class="btn btn-light border border-light" id="contact-tab" type="button" role="tab" aria-controls="contact" aria-selected="false" onclick="location.href='about.php'" style="padding-left: 55px; padding-right: 55px;">About</button>
                         </li>
                         <li class="nav-item mx-4">
-                            <button class="btn btn-secondary border border-dark" id="about-tab" type="button" role="tab" aria-controls="contact" aria-selected="true" onclick="location.href='contact.php'" style="padding-left: 48px; padding-right: 48px;">Contact</button>
+                            <button class="btn btn-warning border border-warning" id="about-tab" type="button" role="tab" aria-controls="contact" aria-selected="true" onclick="location.href='contact.php'" style="padding-left: 48px; padding-right: 48px;">Contact</button>
                         </li>
                     </ul>
                 </div>
