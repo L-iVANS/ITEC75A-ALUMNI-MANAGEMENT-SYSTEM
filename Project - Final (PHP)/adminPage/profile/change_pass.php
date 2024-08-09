@@ -257,11 +257,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <input type="text" name="currentPass" class="form-control" id="formGroupExampleInput" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="formGroupExampleInput2" class="form-label">Change Password</label>
+                                    <label for="formGroupExampleInput2" class="form-label">New Password</label>
                                     <input type="password" name="newPass" class="form-control" id="formGroupExampleInput2" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="formGroupExampleInput2" class="form-label">Confirm Password</label>
+                                    <label for="formGroupExampleInput2" class="form-label">Confirm New Password</label>
                                     <input type="password" name="confirmPass" class="form-control" id="formGroupExampleInput2" required>
                                 </div>
                                 <div class="row">
