@@ -194,7 +194,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                     });
                 });
             </script>";
-
         } else if ($user_type == 'declined_account') {
             // DECLINED ACCOUNT
             echo "
@@ -211,7 +210,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                     });
                 });
             </script>";
-            
         } else {
             // Redirect to ALUMNI DASHBOARD
             echo "
@@ -249,7 +247,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             });
         </script>";
-    
     }
 } else if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $stud_id = $_POST['student_id'];
@@ -266,48 +263,160 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
     $password = $_POST['password'];
 
     // email and user existing check
-    $emailCheck = mysqli_query($conn, "SELECT * FROM pending WHERE email='$email'");
+    $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
+    $emailCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email='$email'");
+    $idCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE student_id='$stud_id'");
+    $idCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE student_id='$stud_id'");
+
+    // email and user existing check
+    $emailCheck_pending = mysqli_query($conn, "SELECT * FROM pending WHERE email='$email'");
     $emailCheck_decline = mysqli_query($conn, "SELECT * FROM declined_account WHERE email='$email'");
-    $idCheck = mysqli_query($conn, "SELECT * FROM declined_account WHERE student_id='$stud_id'");
+    $idCheck_pending = mysqli_query($conn, "SELECT * FROM pending WHERE student_id='$stud_id'");
     $idCheck_decline = mysqli_query($conn, "SELECT * FROM declined_account WHERE student_id='$stud_id'");
 
+
     if (mysqli_num_rows($emailCheck) > 0) {
-        $errorMessage = "Email Already Exists";
-    } else if (mysqli_num_rows($emailCheck_decline) > 0) {
-        $errorMessage = "Email Already Exists";
+        echo "
+            <script>
+                // Wait for the document to load
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                            title: 'Email Already Exists',
+                            timer: 2000,
+                            showConfirmButton: true, // Show the confirm button
+                            confirmButtonColor: '#4CAF50', // Set the button color to green
+                            confirmButtonText: 'OK' // Change the button text if needed
+                    });
+                });
+            </script>
+        ";
+    } else if (mysqli_num_rows($emailCheck_archive) > 0) {
+        echo "
+            <script>
+                // Wait for the document to load
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                            title: 'Email Already Exists',
+                            timer: 2000,
+                            showConfirmButton: true, // Show the confirm button
+                            confirmButtonColor: '#4CAF50', // Set the button color to green
+                            confirmButtonText: 'OK' // Change the button text if needed
+                    });
+                });
+            </script>
+        ";
     } else if (mysqli_num_rows($idCheck) > 0) {
-        $errorMessage = "Student ID Already Exists";
+        echo "
+            <script>
+                // Wait for the document to load
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                            title: 'Student ID Already Exists',
+                            timer: 2000,
+                            showConfirmButton: true, // Show the confirm button
+                            confirmButtonColor: '#4CAF50', // Set the button color to green
+                            confirmButtonText: 'OK' // Change the button text if needed
+                    });
+                });
+            </script>
+        ";
+    } else if (mysqli_num_rows($idCheck_archive) > 0) {
+        echo "
+            <script>
+                // Wait for the document to load
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                            title: 'Student ID Already Exists',
+                            timer: 2000,
+                            showConfirmButton: true, // Show the confirm button
+                            confirmButtonColor: '#4CAF50', // Set the button color to green
+                            confirmButtonText: 'OK' // Change the button text if needed
+                    });
+                });
+            </script>
+        ";
+    } else if (mysqli_num_rows($emailCheck_pending) > 0) {
+        echo "
+            <script>
+                // Wait for the document to load
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                            title: 'Email Already Exists',
+                            timer: 2000,
+                            showConfirmButton: true, // Show the confirm button
+                            confirmButtonColor: '#4CAF50', // Set the button color to green
+                            confirmButtonText: 'OK' // Change the button text if needed
+                    });
+                });
+            </script>
+        ";
+    } else if (mysqli_num_rows($emailCheck_decline) > 0) {
+        echo "
+            <script>
+                // Wait for the document to load
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                            title: 'Email Already Exists',
+                            timer: 2000,
+                            showConfirmButton: true, // Show the confirm button
+                            confirmButtonColor: '#4CAF50', // Set the button color to green
+                            confirmButtonText: 'OK' // Change the button text if needed
+                    });
+                });
+            </script>
+        ";
+    } else if (mysqli_num_rows($idCheck_pending) > 0) {
+        echo "
+            <script>
+                // Wait for the document to load
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                            title: 'Student ID Already Exists',
+                            timer: 2000,
+                            showConfirmButton: true, // Show the confirm button
+                            confirmButtonColor: '#4CAF50', // Set the button color to green
+                            confirmButtonText: 'OK' // Change the button text if needed
+                    });
+                });
+            </script>
+        ";
     } else if (mysqli_num_rows($idCheck_decline) > 0) {
-        $errorMessage = "Student ID Already Exists";
+        echo "
+            <script>
+                // Wait for the document to load
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                            title: 'Student ID Already Exists',
+                            timer: 2000,
+                            showConfirmButton: true, // Show the confirm button
+                            confirmButtonColor: '#4CAF50', // Set the button color to green
+                            confirmButtonText: 'OK' // Change the button text if needed
+                    });
+                });
+            </script>
+        ";
     } else {
 
-        // email and user existing check
-        $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
-        $emailCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email='$email'");
-        $idCheck = mysqli_query($conn, "SELECT * FROM declined_account WHERE student_id='$stud_id'");
-        $idCheck_archive = mysqli_query($conn, "SELECT * FROM declined_account WHERE student_id='$stud_id'");
 
 
-        if (mysqli_num_rows($emailCheck) > 0) {
-            $errorMessage = "Email Already Exists";
-        } else if (mysqli_num_rows($emailCheck_archive) > 0) {
-            $errorMessage = "Email Already Exists";
-        } else if (mysqli_num_rows($idCheck) > 0) {
-            $errorMessage = "Student ID Already Exists";
-        } else if (mysqli_num_rows($idCheck_archive) > 0) {
-            $errorMessage = "Student ID Already Exists";
-        } else {
+        $filePath = '../assets/profile_icon.jpg';
+        $imageData = file_get_contents($filePath);
+        $imageDataEscaped = addslashes($imageData);
 
-            $filePath = '../assets/profile_icon.jpg';
-            $imageData = file_get_contents($filePath);
-            $imageDataEscaped = addslashes($imageData);
+        $sql = "INSERT INTO pending SET student_id='$stud_id', fname='$fname', mname='$mname', lname='$lname', gender='$gender', course='$course', batch_startYear='$fromYear', batch_endYear='$toYear', contact='$contact', address='$address', email='$email', password='$password', picture='$imageDataEscaped'";
+        $result = $conn->query($sql);
 
-            $sql = "INSERT INTO pending SET student_id='$stud_id', fname='$fname', mname='$mname', lname='$lname', gender='$gender', course='$course', batch_startYear='$fromYear', batch_endYear='$toYear', contact='$contact', address='$address', email='$email', password='$password', picture='$imageDataEscaped'";
-            $result = $conn->query($sql);
-
-            if ($result) {
-                // $successMessage = "Coordinator Edited Successfully";
-                echo "
+        if ($result) {
+            // $successMessage = "Coordinator Edited Successfully";
+            echo "
             <script>
                 // Wait for the document to load
                 document.addEventListener('DOMContentLoaded', function() {
@@ -325,7 +434,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>
             ";
-            }
         }
     }
 }
@@ -383,7 +491,7 @@ function check_alumni($conn, $table, $log_email, $pass)
 
     <div class="container" id="container">
         <div class="form-container sign-up-container">
-            <form action="#" method="POST" onsubmit="return submitForm(this);">
+            <form action="#" method="POST">
                 <h1>Sign Up</h1>
 
                 <div class="infield">
