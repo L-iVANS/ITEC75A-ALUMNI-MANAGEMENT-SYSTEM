@@ -55,18 +55,28 @@ if (isset($_GET['id'])) {
         header('Location: ../../../homepage.php');
         exit();
     }
-    
+
     //insert data into table alumni_archive from alumni
-    $sql_archive = "INSERT INTO declined_account (student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, picture, date_created)" .
-        "SELECT student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, picture, date_created FROM pending WHERE alumni_id=$alumni_id";
-    $conn->query($sql_archive);
+
+    $sql_archive = "INSERT INTO declined_account (alumni_id, student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, picture, date_created)" .
+        "SELECT alumni_id, student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, picture, date_created FROM pending WHERE alumni_id = ?";
+
+    $stmt = $conn->prepare($sql_archive);
+    $stmt->bind_param("s", $alumni_id);
+    $stmt->execute();
+    $stmt->close();
+
+    // $conn->query($sql_archive);
 
     //delete data in table alumni
-    $sql_delete = "DELETE FROM pending WHERE alumni_id=$alumni_id";
-    $conn->query($sql_delete);
+    $sql_delete = "DELETE FROM pending WHERE alumni_id= ?";
+    $stmt = $conn->prepare($sql_delete);
+    $stmt->bind_param("s", $alumni_id);
+    $stmt->execute();
+    $stmt->close();
+    // $conn->query($sql_delete);
 }
 // Output SweetAlert2 message with a timer
 $transfer = $alumni_id;
 header("Location: ./pending.php?ide_decline=$transfer");
 exit;
-?>

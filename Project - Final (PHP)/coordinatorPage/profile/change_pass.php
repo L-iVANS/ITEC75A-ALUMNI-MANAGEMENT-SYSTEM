@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errorMessage = "New password and confirm password do not match.";
     } else {
         // Update the password in the database
-        $updateQuery = "UPDATE coor SET password = '$newPass' WHERE coor_id = $userId";
+        $updateQuery = "UPDATE coordinator SET password = '$newPass' WHERE coor_id = $userId";
         if (mysqli_query($conn, $updateQuery)) {
             echo "
             <script>

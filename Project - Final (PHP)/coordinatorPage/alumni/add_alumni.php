@@ -1,3 +1,4 @@
+add_alumni.php
 <?php
 session_start();
 
@@ -48,7 +49,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         exit();
     }
     $stmt->close();
-    
 } else {
     header('Location: ../../homepage.php');
     exit();
@@ -87,44 +87,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // email and user existing check
     $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
-    $emailCheck_decline = mysqli_query($conn, "SELECT * FROM declined_account WHERE email='$email'");
+    $emailCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email='$email'");
     $idCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE student_id='$stud_id'");
+    $idCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE student_id='$stud_id'");
+
+    // email and user existing check
+    $emailCheck_pending = mysqli_query($conn, "SELECT * FROM pending WHERE email='$email'");
+    $emailCheck_decline = mysqli_query($conn, "SELECT * FROM declined_account WHERE email='$email'");
+    $idCheck_pending = mysqli_query($conn, "SELECT * FROM pending WHERE student_id='$stud_id'");
     $idCheck_decline = mysqli_query($conn, "SELECT * FROM declined_account WHERE student_id='$stud_id'");
+
 
     if (mysqli_num_rows($emailCheck) > 0) {
         $errorMessage = "Email Already Exists";
-    } else if (mysqli_num_rows($emailCheck_decline) > 0) {
+    } else if (mysqli_num_rows($emailCheck_archive) > 0) {
         $errorMessage = "Email Already Exists";
     } else if (mysqli_num_rows($idCheck) > 0) {
+        $errorMessage = "Student ID Already Exists";
+    } else if (mysqli_num_rows($idCheck_archive) > 0) {
+        $errorMessage = "Student ID Already Exists";
+    } else if (mysqli_num_rows($emailCheck_pending) > 0) {
+        $errorMessage = "Email Already Exists";
+    } else if (mysqli_num_rows($emailCheck_decline) > 0) {
+        $errorMessage = "Email Already Exists";
+    } else if (mysqli_num_rows($idCheck_pending) > 0) {
         $errorMessage = "Student ID Already Exists";
     } else if (mysqli_num_rows($idCheck_decline) > 0) {
         $errorMessage = "Student ID Already Exists";
     } else {
 
-        // email and user existing check
-        $emailCheck = mysqli_query($conn, "SELECT * FROM pending WHERE email='$email'");
-        $emailCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email='$email'");
-        $idCheck = mysqli_query($conn, "SELECT * FROM pending WHERE student_id='$stud_id'");
-        $idCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE student_id='$stud_id'");
+        $filePath = '../../assets/profile_icon.jpg';
+        $imageData = file_get_contents($filePath);
+        $imageDataEscaped = addslashes($imageData);
 
-
-        if (mysqli_num_rows($emailCheck) > 0) {
-            $errorMessage = "Email Already Exists";
-        } else if (mysqli_num_rows($emailCheck_archive) > 0) {
-            $errorMessage = "Email Already Exists";
-        } else if (mysqli_num_rows($idCheck) > 0) {
-            $errorMessage = "Student ID Already Exists";
-        } else if (mysqli_num_rows($idCheck_archive) > 0) {
-            $errorMessage = "Student ID Already Exists";
-        } else {
-
-            $filePath = '../../assets/profile_icon.jpg';
-            $imageData = file_get_contents($filePath);
-            $imageDataEscaped = addslashes($imageData);
-
-            $sql = "INSERT INTO alumni SET student_id='$stud_id', fname='$fname', mname='$mname', lname='$lname', gender='$gender', course='$course', batch_startYear='$fromYear', batch_endYear='$toYear', contact='$contact', address='$address', email='$email', password='$temp_password', picture='$imageDataEscaped'";
-            $result = $conn->query($sql);
-            echo "
+        $sql = "INSERT INTO alumni SET student_id='$stud_id', fname='$fname', mname='$mname', lname='$lname', gender='$gender', course='$course', batch_startYear='$fromYear', batch_endYear='$toYear', contact='$contact', address='$address', email='$email', password='$temp_password', picture='$imageDataEscaped'";
+        $result = $conn->query($sql);
+        echo "
             <script>
                 // Wait for the document to load
                 document.addEventListener('DOMContentLoaded', function() {
@@ -142,9 +140,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 });
             </script>
             ";
-        }
     }
 }
+
 ?>
 
 <!DOCTYPE html>

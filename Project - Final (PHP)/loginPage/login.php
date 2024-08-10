@@ -641,6 +641,25 @@ function check_alumni($conn, $table, $log_email, $pass)
             container.classList.remove('right-panel-active');
         });
     </script> -->
+  
+
+<script>
+document.getElementById("registrationForm").addEventListener("submit", function(event) {
+    var password = document.getElementById("password").value;
+    var passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8}$/;
+
+    if (!passwordRegex.test(password)) {
+        Swal.fire({
+            title: 'Invalid Password!',
+            text: 'Password must be exactly 8 characters long, contain at least 1 uppercase letter, and 1 special character.',
+            confirmButtonColor: '#4CAF50',
+            confirmButtonText: 'OK'
+        });
+        event.preventDefault(); // Prevent form submission
+    }
+});
+</script>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {

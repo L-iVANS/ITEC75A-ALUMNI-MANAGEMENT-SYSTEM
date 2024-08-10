@@ -92,7 +92,7 @@ if ($result->num_rows > 0) {
 }
 
 // EVENT COUNT EVERY MONTH
-$query_event = "SELECT MONTH(schedule) as month, COUNT(*) as count FROM event GROUP BY MONTH(schedule)";
+$query_event = "SELECT MONTH(date) as month, COUNT(*) as count FROM event GROUP BY MONTH(date)";
 $res_event = $conn->query($query_event);
 
 $labels_event = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
@@ -411,8 +411,8 @@ if ($res_alumniCount->num_rows > 0) {
                 },
                 jsPDF: {
                     unit: 'in',
-                    format: 'letter',
-                    orientation: 'portrait'
+                    format: 'legal',
+                    orientation: 'landscape'
                 }
             };
 
