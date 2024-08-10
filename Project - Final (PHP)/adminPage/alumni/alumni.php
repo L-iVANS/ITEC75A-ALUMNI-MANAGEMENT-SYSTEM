@@ -67,14 +67,20 @@ $sql = "SELECT * FROM alumni ";
 if (isset($_GET['query']) && !empty($_GET['query'])) {
     $search_query = $_GET['query'];
     // Modify SQL query to include search filter
-    $sql .= "WHERE alumni_id LIKE '%$search_query%' 
+    $sql .= "WHERE student_id LIKE '%$search_query%' 
             OR fname LIKE '%$search_query%' 
             OR mname LIKE '%$search_query%' 
             OR lname LIKE '%$search_query%'
             OR address LIKE '%$search_query%'
             OR email LIKE '%$search_query%' 
             OR course LIKE '%$search_query%'
-            OR (gender LIKE '%$search_query%' AND gender != 'fe') ";
+            OR CONCAT(batch_startYear, ' - ', batch_endYear) LIKE '%$search_query%'
+            OR date_created LIKE '%$search_query%'
+            OR contact LIKE '%$search_query%' ";
+
+            if  (strtolower($search_query) === 'male' || strtolower($search_query) === 'female') {
+                $sql .= "OR gender = '$search_query' ";
+            }
 }
 
 $sql .= "ORDER BY student_id ASC ";
@@ -92,7 +98,16 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
                               OR address LIKE '%$search_query%'
                               OR email LIKE '%$search_query%' 
                               OR course LIKE '%$search_query%'
-                              OR (gender LIKE '%$search_query%' AND gender != 'fe')";
+                              OR CONCAT(batch_startYear, ' - ', batch_endYear) LIKE '%$search_query%'
+                              OR date_created LIKE '%$search_query%'
+                              OR contact LIKE '%$search_query%'
+                               ";
+                              
+
+                              if  (strtolower($search_query) === 'male' || strtolower($search_query) === 'female') {
+                                $sql .= "OR gender = '$search_query' ";
+                            }
+
 }
 $total_records_result = mysqli_query($conn, $total_records_query);
 $total_records_row = mysqli_fetch_array($total_records_result);
