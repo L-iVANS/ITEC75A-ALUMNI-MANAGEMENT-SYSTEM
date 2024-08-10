@@ -55,7 +55,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 }
 
 // Read data from table alumni
-$sql = "SELECT * FROM event";
+$sql = "SELECT * FROM event WHERE schedule >= CURDATE() ORDER BY schedule ASC";
 $result = $conn->query($sql);
 
 ?>
