@@ -170,34 +170,14 @@ $event_count = $row_event['events_count'];
             </div>
         </main>
         <div class="page-content">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card bg-warning text-white mb-4">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <i class="las la-calendar-alt fa-3x" style="font-size: 25px;"></i>
-                                <div class="row mb-3">
-                                    <!-- Display events Total Count -->
-                                    <label style="font-size: 20px;">Events Total Count:</label>
-                                    <!-- display events count in database -->
-                                    <label class="col-sm-10 col-form-label" style="font-size: 40px;"><?php echo $event_count; ?></label>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="event/event.php" class="card-footer d-flex justify-content-between text-white" style="text-decoration: none;">
-                            <span>View Details</span>
-                            <i class="las la-arrow-circle-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-8 notice-box">
+                <div class="col-md-12 notice-box">
                     <div class="notice-title">Notice Alumni!</div>
                     <div class="notice-text">
                         <span>Welcome to Cavite State University - Imus Campus' Alumni Management System. Please be informed that <em>alumni records and transactions are managed separately from current student records</em>. Therefore, updates made in the system may not immediately reflect changes in official university records. For any questions, inquiries, or technical issues regarding the Alumni Management System, please contact the administrator and coordinator of the system.</span><br><br>
                     </div>
                 </div>
                 <div class="container">
-                    <div class="quick-links">
+                    <div class="col-md-12 quick-links">
                         <h5><i class="fas fa-info-circle"></i> Quick Links</h5>
                         <div class="quick-link-item">
                             <a href="https://cvsu-imus.edu.ph">

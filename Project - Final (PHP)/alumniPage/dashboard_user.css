@@ -287,22 +287,21 @@ main {
 }
 
 .quick-links {
-    position: absolute ;
+    /* position: absolute ; */
     background-color: #f8f9fa;
     border: 1px solid #dee2e6;
     border-radius: 5px;
     padding: 1rem;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
     float: left;
-    width: 27.3%;
-    margin-right: 20px;
+
 }
 
 .notice-box {
     background-color: #d4edda;
     border-left: 4px solid #28a745;
     padding: 1rem;
-    margin-top: 1rem;
+    margin-top: 3rem;
     border-radius: 5px;
     margin-left: auto;
     width: 60%;
