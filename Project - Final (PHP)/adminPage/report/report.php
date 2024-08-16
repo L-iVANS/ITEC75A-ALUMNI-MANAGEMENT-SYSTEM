@@ -19,7 +19,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
     if ($user_result->num_rows > 0) {
         // User is an admin
-        $user = $user_result->fetch_assoc();   
+        $user = $user_result->fetch_assoc();
     }
     $stmt->close();
 
@@ -48,7 +48,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         exit();
     }
     $stmt->close();
-    
 } else {
     header('Location: ../../homepage.php');
     exit();
@@ -56,23 +55,23 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
 
 // COUNTS
-    //query for alumni count
-    $sql_alumni = "SELECT COUNT(student_id) AS alumni_count FROM alumni";
-    $result_alumni = $conn->query($sql_alumni);
-    $row_alumni = $result_alumni->fetch_assoc();
-    $count_alumni = $row_alumni['alumni_count'];
+//query for alumni count
+$sql_alumni = "SELECT COUNT(student_id) AS alumni_count FROM alumni";
+$result_alumni = $conn->query($sql_alumni);
+$row_alumni = $result_alumni->fetch_assoc();
+$count_alumni = $row_alumni['alumni_count'];
 
-    //query for alumni count
-    $sql_coordinator = "SELECT COUNT(coor_id) AS coordinators_count FROM coordinator";
-    $result_coordinator = $conn->query($sql_coordinator);
-    $row_coordinator = $result_coordinator->fetch_assoc();
-    $coordinator_count = $row_coordinator['coordinators_count'];
+//query for alumni count
+$sql_coordinator = "SELECT COUNT(coor_id) AS coordinators_count FROM coordinator";
+$result_coordinator = $conn->query($sql_coordinator);
+$row_coordinator = $result_coordinator->fetch_assoc();
+$coordinator_count = $row_coordinator['coordinators_count'];
 
-    //query for events count
-    $sql_event = "SELECT COUNT(event_id) AS events_count FROM event";
-    $result_event = $conn->query($sql_event);
-    $row_event = $result_event->fetch_assoc();
-    $event_count = $row_event['events_count'];
+//query for events count
+$sql_event = "SELECT COUNT(event_id) AS events_count FROM event";
+$result_event = $conn->query($sql_event);
+$row_event = $result_event->fetch_assoc();
+$event_count = $row_event['events_count'];
 
 
 $sql = "SELECT course, COUNT(*) as count FROM alumni GROUP BY course";
@@ -117,7 +116,7 @@ $labels_alumniCount = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'A
 $data_alumniCount = array_fill(0, 12, 0);
 
 if ($res_alumniCount->num_rows > 0) {
-    while($row_alumniCount = $res_alumniCount->fetch_assoc()) {
+    while ($row_alumniCount = $res_alumniCount->fetch_assoc()) {
         $data_alumniCount[$row_alumniCount['month'] - 1] = $row_alumniCount['count'];
     }
 }
@@ -240,6 +239,11 @@ if ($res_alumniCount->num_rows > 0) {
             </div>
             <div class="container mt-4 p-3 shadow bg-white rounded">
                 <form id="report-form">
+                    <div id="pdf-header" style="text-align: center; margin-bottom: 20px;">
+                        <h1 style="font-weight: bolder;"><img src="cvsu.png" alt="" id="logo" style="width: 100px;">Alumni Management System Report</h1>
+                        <p>Date: <span id="report-date"></span></p>
+                    </div>
+
                     <div class="summary-boxes">
                         <div class="summary-box" id="alumni">
                             <h2>Total Alumni Registered</h2>
@@ -393,31 +397,28 @@ if ($res_alumniCount->num_rows > 0) {
         );
 
         document.getElementById('download-pdf').addEventListener('click', () => {
-            const element = document.querySelector('form');
+    const element = document.querySelector('form');
+    
+    // Get the current date
+    const currentDate = new Date();
+    const formattedDate = currentDate.toISOString().slice(0, 10);
+    
+    // Update the header date directly in the form
+    document.getElementById('report-date').textContent = formattedDate;
+    
+    const opt = {
+        margin: [0.5, 0.5, 0.5, 0.5], 
+        filename: `alumni-report-${formattedDate}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'legal', orientation: 'landscape' }
+    };
+    
+    // Directly generate PDF from the element without duplicating content
+    html2pdf().from(element).set(opt).save();
+});
 
-            // Get the current date
-            const currentDate = new Date();
-            const formattedDate = currentDate.toISOString().slice(0, 10);
 
-            const opt = {
-                margin: 1,
-                filename: `alumni-report-${formattedDate}.pdf`,
-                image: {
-                    type: 'jpeg',
-                    quality: 0.98
-                },
-                html2canvas: {
-                    scale: 2
-                },
-                jsPDF: {
-                    unit: 'in',
-                    format: 'legal',
-                    orientation: 'landscape'
-                }
-            };
-
-            html2pdf().from(element).set(opt).save();
-        });
 
         document.getElementById('refresh-page').addEventListener('click', () => {
             location.reload();
