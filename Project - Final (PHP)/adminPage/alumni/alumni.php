@@ -78,9 +78,9 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
             OR date_created LIKE '%$search_query%'
             OR contact LIKE '%$search_query%' ";
 
-            if  (strtolower($search_query) === 'male' || strtolower($search_query) === 'female') {
-                $sql .= "OR gender = '$search_query' ";
-            }
+    if (strtolower($search_query) === 'male' || strtolower($search_query) === 'female') {
+        $sql .= "OR gender = '$search_query' ";
+    }
 }
 
 $sql .= "ORDER BY student_id ASC ";
@@ -102,12 +102,11 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
                               OR date_created LIKE '%$search_query%'
                               OR contact LIKE '%$search_query%'
                                ";
-                              
 
-                              if  (strtolower($search_query) === 'male' || strtolower($search_query) === 'female') {
-                                $sql .= "OR gender = '$search_query' ";
-                            }
 
+    if (strtolower($search_query) === 'male' || strtolower($search_query) === 'female') {
+        $sql .= "OR gender = '$search_query' ";
+    }
 }
 $total_records_result = mysqli_query($conn, $total_records_query);
 $total_records_row = mysqli_fetch_array($total_records_result);
@@ -133,7 +132,7 @@ if (isset($_GET['ide'])) {
         });
     </script>
     ";
-    }
+}
 ?>
 
 
@@ -153,7 +152,9 @@ if (isset($_GET['ide'])) {
     </script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
     <!-- FOR PAGINATION -->
     <style>
@@ -363,6 +364,7 @@ if (isset($_GET['ide'])) {
                                         <button id="add-new-btn">Add New +</button>
                                     </a>
                                     <a class='btn btn-secondary border border-dark' href='./pendingAccount/pending.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Pending Account</a>
+                                    <button id="print-table-btn" class="btn btn-primary">Print Table</button>
                                 </div>
                             </div>
                         </div>
@@ -498,6 +500,60 @@ if (isset($_GET['ide'])) {
                 });
             });
         </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // document.getElementById('print-table-btn').addEventListener('click', function() {
+                //     var tableContent = document.querySelector('.table-content').innerHTML;
+
+                //     if (!tableContent) {
+                //         console.error('No content found for printing');
+                //         return; // Exit if no content found
+                //     }
+
+                //     var printWindow = window.open('', '_blank', 'height=600,width=800');
+
+                //     if (!printWindow) {
+                //         console.error('Popup blocked');
+                //         return; // Exit if the popup was blocked
+                //     }
+
+                //     printWindow.document.open();
+                //     printWindow.document.write('<html><head><title>Print Table</title>');
+                //     printWindow.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">');
+                //     printWindow.document.write('</head><body>');
+                //     printWindow.document.write('<table class="table table-striped table-bordered">');
+                //     printWindow.document.write(tableContent);
+                //     printWindow.document.write('</table>');
+                //     printWindow.document.write('</body></html>');
+                //     printWindow.document.close();
+
+                    setTimeout(() => {
+                        printWindow.print();
+                        printWindow.close();
+                    }, 1000);
+                });
+            
+        </script>
+        <script>
+    document.getElementById('print-table-btn').addEventListener('click', function() {
+        // Get the table content element
+        var tableContent = document.querySelector('.table-content');
+
+        // Use html2pdf to generate and download the PDF
+        var opt = {
+            margin: 1,
+            filename: 'alumni_table.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'legal', orientation: 'landscape' }
+        };
+
+        // Convert the table content to PDF
+        html2pdf().from(tableContent).set(opt).save();
+    });
+</script>
+
 </body>
 
 </html>

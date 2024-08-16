@@ -70,6 +70,9 @@ $username = "";
 $log_email = "";
 $pass = "";
 $password = "";
+$confirm_password = "";
+
+
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset($_POST['log_password'])) {
     $log_email = strtolower($_POST['log_email']);
@@ -210,6 +213,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                     });
                 });
             </script>";
+
+            // Check if new password and confirm password match
         } else {
             // Redirect to ALUMNI DASHBOARD
             echo "
@@ -261,6 +266,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
     $address = ucwords($_POST['address']);
     $email = strtolower($_POST['email']);
     $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
 
     // email and user existing check
     $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
@@ -275,6 +281,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
     $idCheck_decline = mysqli_query($conn, "SELECT * FROM declined_account WHERE student_id='$stud_id'");
 
 
+    
     if (mysqli_num_rows($emailCheck) > 0) {
         echo "
             <script>
@@ -291,6 +298,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>
         ";
+        
     } else if (mysqli_num_rows($emailCheck_archive) > 0) {
         echo "
             <script>
@@ -307,6 +315,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>
         ";
+        
     } else if (mysqli_num_rows($idCheck) > 0) {
         echo "
             <script>
@@ -355,7 +364,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>
         ";
+    } else {
+
+            // Check if new password and confirm password match
+            if ($password !== $confirm_password) {
+                // $errorMessage = "New password and confirm password do not match.";
+                echo "<script>
+                // Wait for the document to load
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                        title: 'Password Does Not Match!',
+                        timer: 4000,
+                        showConfirmButton: true, // Show the confirm button
+                        confirmButtonColor: '#4CAF50', // Set the button color to green
+                        confirmButtonText: 'OK' // Change the button text if needed
+                    });
+                });
+            </script>";
     } else if (mysqli_num_rows($emailCheck_decline) > 0) {
+        
         echo "
             <script>
                 // Wait for the document to load
@@ -387,6 +415,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>
         ";
+        
     } else if (mysqli_num_rows($idCheck_decline) > 0) {
         echo "
             <script>
@@ -404,7 +433,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
             </script>
         ";
     } else {
-
 
 
         $filePath = '../assets/profile_icon.jpg';
@@ -434,6 +462,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>
             ";
+        }
         }
     }
 }
@@ -500,7 +529,13 @@ function check_alumni($conn, $table, $log_email, $pass)
                 </div>
                 <div class="infield">
                     <input type="text" placeholder="Password" name="password" value="<?php echo htmlspecialchars($password); ?>" required />
+                    <!-- <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('password', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" /> -->
                     <label></label>
+
+                </div>
+                <div class="infield">
+                    <input type="password" placeholder="Confirm Password" id="confirm_password" name="confirm_password" value="<?php echo htmlspecialchars($confirm_password); ?>" required />
+                    <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
                 </div>
                 <div class="infield">
                     <input type="number" placeholder="Student ID" name="student_id" value="<?php echo htmlspecialchars($stud_id); ?>" required />
@@ -596,8 +631,9 @@ function check_alumni($conn, $table, $log_email, $pass)
                     <input type="text" placeholder="Student ID / Email" name="log_email" required />
                     <label></label>
                 </div>
-                <div class="infield">
-                    <input type="password" placeholder="Password" name="log_password" required />
+                <div class="infield" style="position: relative;">
+                    <input type="password" placeholder="Password" id="log_password" name="log_password" required style="padding-right: 30px;" />
+                    <img id="toggleLogPassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('log_password', 'toggleLogPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
                     <label></label>
                 </div>
                 <!-- <a href="#" class="forgot">Forgot your password?</a> -->
@@ -641,24 +677,25 @@ function check_alumni($conn, $table, $log_email, $pass)
             container.classList.remove('right-panel-active');
         });
     </script> -->
-  
 
-<script>
-document.getElementById("registrationForm").addEventListener("submit", function(event) {
-    var password = document.getElementById("password").value;
-    var passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8}$/;
 
-    if (!passwordRegex.test(password)) {
-        Swal.fire({
-            title: 'Invalid Password!',
-            text: 'Password must be exactly 8 characters long, contain at least 1 uppercase letter, and 1 special character.',
-            confirmButtonColor: '#4CAF50',
-            confirmButtonText: 'OK'
+
+    <script>
+        document.getElementById("registrationForm").addEventListener("submit", function(event) {
+            var password = document.getElementById("password").value;
+            var passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8}$/;
+
+            if (!passwordRegex.test(password)) {
+                Swal.fire({
+                    title: 'Invalid Password!',
+                    text: 'Password must be exactly 8 characters long, contain at least 1 uppercase letter, and 1 special character.',
+                    confirmButtonColor: '#4CAF50',
+                    confirmButtonText: 'OK'
+                });
+                event.preventDefault(); // Prevent form submission
+            }
         });
-        event.preventDefault(); // Prevent form submission
-    }
-});
-</script>
+    </script>
 
 
     <script>
@@ -750,7 +787,103 @@ document.getElementById("registrationForm").addEventListener("submit", function(
                 });
             return false; // Prevent default form submission
         }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const signUpButton = document.getElementById('signUp');
+            const logInButton = document.getElementById('logIn');
+            const container = document.getElementById('container');
+
+            // Function to read URL parameters
+            function getQueryParams() {
+                const params = {};
+                window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(str, key, value) {
+                    params[key] = value;
+                });
+                return params;
+            }
+
+            // Check URL parameters and activate the appropriate tab
+            const params = getQueryParams();
+            if (params.tab === 'signup') {
+                container.classList.add('right-panel-active');
+            } else if (params.tab === 'login') {
+                container.classList.remove('right-panel-active');
+            }
+
+            signUpButton.addEventListener('click', () => {
+                container.classList.add('right-panel-active');
+            });
+
+            logInButton.addEventListener('click', () => {
+                container.classList.remove('right-panel-active');
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const startYearSelect = document.getElementById('startYear');
+            const endYearSelect = document.getElementById('endYear');
+
+            // Disable endYear select by default if no start year is selected
+            if (!startYearSelect.value) {
+                endYearSelect.disabled = true;
+            } else {
+                populateEndYearOptions(parseInt(startYearSelect.value));
+            }
+
+            startYearSelect.addEventListener('change', function() {
+                const selectedStartYear = parseInt(this.value);
+                endYearSelect.disabled = false;
+
+                populateEndYearOptions(selectedStartYear);
+            });
+
+            function populateEndYearOptions(selectedStartYear) {
+                const currentYear = new Date().getFullYear();
+                const yearRange = 21; // Adjust this number as needed
+                const selectedEndYear = endYearSelect.getAttribute('data-selected'); // Get the selected end year
+
+                // Clear current endYear options
+                endYearSelect.innerHTML = '<option value="" selected hidden disabled>Batch: To Year</option>';
+
+                // Generate new options for endYear
+                for (let year = selectedStartYear + 1; year <= currentYear + yearRange; year++) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    if (year == selectedEndYear) {
+                        option.selected = true; // Preserve the selected end year
+                    }
+                    endYearSelect.appendChild(option);
+                }
+            }
+        });
+
+        // FOR NO NIGGATIVE NUMBERS
+        document.addEventListener("DOMContentLoaded", function() {
+            const studentIdInput = document.getElementById("student_id");
+
+            studentIdInput.addEventListener("input", function(event) {
+                let value = studentIdInput.value;
+                // Replace all non-numeric characters
+                value = value.replace(/[^0-9]/g, '');
+                studentIdInput.value = value;
+            });
+        });
+
+        function togglePasswordVisibility(passwordId, toggleId) {
+            var passwordField = document.getElementById(passwordId);
+            var toggleIcon = document.getElementById(toggleId);
+
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.src = 'eye-open.png'; // Use the image for showing password
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.src = 'eye-close.png'; // Use the image for hiding password
+            }
+        }
     </script>
+    
 </body>
 
 </html>
