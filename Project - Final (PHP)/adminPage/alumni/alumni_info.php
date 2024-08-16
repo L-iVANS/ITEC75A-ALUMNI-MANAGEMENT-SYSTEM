@@ -139,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $email = $row['email'];
         $file = $row['picture'];
 
-        $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
+        $batch = $row["batch_startYear"];
     }
 }
 

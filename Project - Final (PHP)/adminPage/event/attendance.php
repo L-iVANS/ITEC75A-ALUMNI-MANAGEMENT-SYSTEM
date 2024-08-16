@@ -7,6 +7,7 @@ $db_password = "";
 $db_name = "alumni_management_system";
 $conn = new mysqli($servername, $db_username, $db_password, $db_name);
 
+// Check user session and type
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
     $account_email = $_SESSION['user_email'];
@@ -17,8 +18,9 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $stmt->execute();
     $user_result = $stmt->get_result();
 
+
+    
     if ($user_result->num_rows > 0) {
-        // User is an admin
         $user = $user_result->fetch_assoc();
     }
     $stmt->close();
@@ -30,7 +32,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $user_result = $stmt->get_result();
 
     if ($user_result->num_rows > 0) {
-        // User is a coordinator
         header('Location: ../../coordinatorPage/dashboard_coor.php');
         exit();
     }
@@ -43,7 +44,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $user_result = $stmt->get_result();
 
     if ($user_result->num_rows > 0) {
-        // User is an alumni
         header('Location: ../../alumniPage/dashboard_user.php');
         exit();
     }
@@ -54,89 +54,94 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 }
 
 // Pagination configuration
-$records_per_page = 6; // Number of records to display per page
-$current_page = isset($_GET['page']) ? $_GET['page'] : 1; // Get current page number, default to 1
+$records_per_page = 6;
+$current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
 // Calculate the limit clause for SQL query
 $start_from = ($current_page - 1) * $records_per_page;
 
-// Initialize variables
-$sql = "SELECT * FROM alumni ";
+// Get event_id from URL parameter
+$event_id = isset($_GET['event_id']) ? (int)$_GET['event_id'] : 0;
 
-// Check if search query is provided
-if (isset($_GET['query']) && !empty($_GET['query'])) {
-    $search_query = $_GET['query'];
-    // Modify SQL query to include search filter
-    $sql .= "WHERE student_id LIKE '%$search_query%' 
-            OR fname LIKE '%$search_query%' 
-            OR mname LIKE '%$search_query%' 
-            OR lname LIKE '%$search_query%'
-            OR address LIKE '%$search_query%'
-            OR email LIKE '%$search_query%' 
-            OR course LIKE '%$search_query%'
-            OR CONCAT(batch_startYear, ' - ', batch_endYear) LIKE '%$search_query%'
-            OR date_created LIKE '%$search_query%'
-            OR contact LIKE '%$search_query%' ";
-
-            if  (strtolower($search_query) === 'male' || strtolower($search_query) === 'female') {
-                $sql .= "OR gender = '$search_query' ";
-            }
+// Initialize SQL query
+$sql = "
+    SELECT DISTINCT alumni.student_id, alumni.fname, alumni.mname, alumni.lname, alumni.gender, alumni.course, 
+                    alumni.batch_startYear, alumni.batch_endYear, alumni.contact, alumni.address, alumni.email 
+    FROM alumni 
+    INNER JOIN event_choice ON alumni.student_id = event_choice.student_id 
+    WHERE event_choice.event_choice = 'Going' 
+      AND event_choice.event_id = ?";
+if (isset($search_query) && !empty($search_query)) {
+    $sql .= " AND (student_id LIKE ? 
+                     OR fname LIKE ? 
+                     OR mname LIKE ? 
+                     OR lname LIKE ?
+                     OR address LIKE ?
+                     OR email LIKE ? 
+                     OR course LIKE ?
+                     OR CONCAT(batch_startYear, ' - ', batch_endYear) LIKE ?
+                     OR contact LIKE ? 
+                     OR gender = ?)";
 }
-
-$sql .= "ORDER BY student_id ASC ";
-$sql .= "LIMIT $start_from, $records_per_page";
-
-$result = $conn->query($sql);
+$sql .= " ORDER BY student_id ASC LIMIT ?, ?";
+$stmt = $conn->prepare($sql);
+if (isset($search_query) && !empty($search_query)) {
+    $search_wildcard = "%$search_query%";
+    $stmt->bind_param(
+        str_repeat('s', 10) . 'ii', // 10 's' for search terms and 2 'i' for event_id and pagination limits
+        $search_wildcard, $search_wildcard, $search_wildcard, $search_wildcard,
+        $search_wildcard, $search_wildcard, $search_wildcard, $search_wildcard,
+        $search_wildcard, strtolower($search_query), $event_id, $start_from, $records_per_page
+    );
+} else {
+    $stmt->bind_param('iii', $event_id, $start_from, $records_per_page);
+}
+$stmt->execute();
+$result = $stmt->get_result();
 
 // Count total number of records
-$total_records_query = "SELECT COUNT(*) FROM alumni";
-if (isset($_GET['query']) && !empty($_GET['query'])) {
-    $total_records_query .= " WHERE alumni_id LIKE '%$search_query%' 
-                              OR fname LIKE '%$search_query%' 
-                              OR mname LIKE '%$search_query%' 
-                              OR lname LIKE '%$search_query%' 
-                              OR address LIKE '%$search_query%'
-                              OR email LIKE '%$search_query%' 
-                              OR course LIKE '%$search_query%'
-                              OR CONCAT(batch_startYear, ' - ', batch_endYear) LIKE '%$search_query%'
-                              OR date_created LIKE '%$search_query%'
-                              OR contact LIKE '%$search_query%'
-                               ";
-                              
-
-                              if  (strtolower($search_query) === 'male' || strtolower($search_query) === 'female') {
-                                $sql .= "OR gender = '$search_query' ";
-                            }
-
+$total_records_query = "
+    SELECT COUNT(*) FROM alumni 
+    INNER JOIN event_choice ON alumni.student_id = event_choice.student_id 
+    WHERE event_choice.event_choice = 'Going' 
+      AND event_choice.event_id = ?";
+if (isset($search_query) && !empty($search_query)) {
+    $total_records_query .= " AND (student_id LIKE ? 
+                                     OR fname LIKE ? 
+                                     OR mname LIKE ? 
+                                     OR lname LIKE ?
+                                     OR address LIKE ?
+                                     OR email LIKE ? 
+                                     OR course LIKE ?
+                                     OR CONCAT(batch_startYear, ' - ', batch_endYear) LIKE ?
+                                     OR contact LIKE ? 
+                                     OR gender = ?)";
 }
-$total_records_result = mysqli_query($conn, $total_records_query);
-$total_records_row = mysqli_fetch_array($total_records_result);
+$total_records_stmt = $conn->prepare($total_records_query);
+if (isset($search_query) && !empty($search_query)) {
+    $search_wildcard = "%$search_query%";
+    $total_records_stmt->bind_param(
+        str_repeat('s', 10) . 'i', // 10 's' for search terms and 1 'i' for event_id
+        $search_wildcard, $search_wildcard, $search_wildcard, $search_wildcard,
+        $search_wildcard, $search_wildcard, $search_wildcard, $search_wildcard,
+        $search_wildcard, strtolower($search_query), $event_id
+    );
+} else {
+    $total_records_stmt->bind_param('i', $event_id);
+}
+$total_records_stmt->execute();
+$total_records_result = $total_records_stmt->get_result();
+$total_records_row = $total_records_result->fetch_array();
 $total_records = $total_records_row[0];
+
 
 $total_pages = ceil($total_records / $records_per_page);
 
-
-
-if (isset($_GET['ide'])) {
-    echo "
-        <script>
-        // Wait for the document to load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Use SweetAlert2 for the alert
-            Swal.fire({
-                title: 'Account Archived Successfully',
-                timer: 2000,
-                showConfirmButton: true, // Show the confirm button
-                confirmButtonColor: '#4CAF50', // Set the button color to green
-                confirmButtonText: 'OK' // Change the button text if needed
-            });
-        });
-    </script>
-    ";
-    }
+// Close the statement
+$stmt->close();
+$total_records_stmt->close();
+$conn->close();
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -267,7 +272,7 @@ if (isset($_GET['ide'])) {
                         </a>
                     </li>
                     <li>
-                        <a href="./alumni.php" class="active">
+                        <a href="../alumni/alumni.php" >
                             <span class="las la-th-list" style="color:#fff"></span>
                             <small>ALUMNI</small>
                         </a>
@@ -279,7 +284,7 @@ if (isset($_GET['ide'])) {
                         </a>
                     </li>
                     <li>
-                        <a href="../event/event.php">
+                        <a href="../event/event.php" class="active">
                             <span class="las la-calendar" style="color:#fff"></span>
                             <small>EVENT</small>
                         </a>
@@ -341,7 +346,7 @@ if (isset($_GET['ide'])) {
             <div class="container-fluid" id="main-container">
                 <div class="container-fluid" id="content-container">
                     <div class="container-title">
-                        <span>Records</span>
+                        <h3>Attending in the Event</h3>
                     </div>
                     <div class="congainer-fluid" id="column-header">
                         <div class="row">
@@ -359,10 +364,10 @@ if (isset($_GET['ide'])) {
                             </div>
                             <div class="col" style="text-align: end;">
                                 <div class="add-button">
-                                    <a style="text-decoration: none;" href='./add_alumni.php'>
+                                    <!-- <a style="text-decoration: none;" href='./add_alumni.php'>
                                         <button id="add-new-btn">Add New +</button>
-                                    </a>
-                                    <a class='btn btn-secondary border border-dark' href='./pendingAccount/pending.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Pending Account</a>
+                                    </a> -->
+                                    <a class='btn btn-secondary border border-dark' href='./event.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Back</a>
                                 </div>
                             </div>
                         </div>
@@ -380,8 +385,8 @@ if (isset($_GET['ide'])) {
                                     <th scope="col" class="inline">CONTACT</th>
                                     <th scope="col" class="inline">ADDRESS</th>
                                     <th scope="col" class="inline">EMAIL</th>
-                                    <th scope="col" class="inline">DATE CREATION</th>
-                                    <th scope="col" class="inline">ACTION</th>
+                                    <!-- <th scope="col" class="inline">DATE CREATION</th> -->
+                                    <!-- <th scope="col" class="inline">ACTION</th> -->
                                 </tr>
                             </thead>
                             <tbody>
@@ -400,15 +405,8 @@ if (isset($_GET['ide'])) {
                                             <td class="inline"><?php echo $row['contact'] ?></td>
                                             <td class="inline"><?php echo $row['address'] ?></td>
                                             <td class="inline"><?php echo $row['email'] ?></td>
-                                            <td class="inline"><?php echo $row['date_created'] ?></td>
-                                            <?php
-                                            echo "
-                                                <td class='inline act'>
-                                                    <a class='btn btn-danger btn-sm archive' href='./del_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Archive</a>
-                                                    <a class='btn btn-info btn-sm' href='./alumni_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Details</a>
-                                                </td>
-                                            "; ?>
-                                        </tr>
+                                            <!-- <td class="inline"><?php echo $row['date_created'] ?></td> -->
+                                           
                                 <?php
                                     }
                                 } else {
@@ -451,7 +449,7 @@ if (isset($_GET['ide'])) {
                 function loadPage(page) {
                     // Simulate an AJAX request to get page content
                     const contentDiv = document.getElementById('content');
-                    contentDiv.innerHTML = `Content for page ${page}`; // Replace with actual AJAX call
+                    contentDiv.innerHTML = Content for page ${page}; // Replace with actual AJAX call
                     currentPage = page;
                 }
 
@@ -501,3 +499,4 @@ if (isset($_GET['ide'])) {
 </body>
 
 </html>
+<!-- Rest of your HTML and pagination code -->

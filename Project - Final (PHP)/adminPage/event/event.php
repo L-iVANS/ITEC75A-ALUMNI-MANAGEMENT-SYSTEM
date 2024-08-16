@@ -358,6 +358,8 @@ echo "
                                     <th scope="col" class="inline">ACTION</th>
                                 </tr>
                             </thead>
+
+                            
                             <tbody>
                                 <?php
                                 if ($result->num_rows > 0) {
@@ -379,7 +381,8 @@ echo "
                                                     <div class='button'>
                                                         <a class='btn btn-warning btn-sm' href='./update_event.php?id=$row[event_id]' style='font-size: 11.8px;'>Update</a>
                                                         <a class='btn btn-danger btn-sm archive' href='./del_event.php?id=$row[event_id]' style='font-size: 11.8px;'>Archive</a>
-                                                    </div>
+                                                        <a class='btn btn-primary btn-sm view-details' href='./attendance.php?id=$row[event_id]' style='font-size: 11.8px;'>View Details</a>
+                                                        </div>
                                                 </td>
                                             "; ?>
                                         </tr>
