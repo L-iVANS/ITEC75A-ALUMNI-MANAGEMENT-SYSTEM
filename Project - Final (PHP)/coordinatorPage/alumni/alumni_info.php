@@ -259,18 +259,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 </div>
                 <div class="container" id="content">
                     <!-- PROFILE -->
+                    <div class="container" id="content">
+                    <!-- PROFILE -->
                     <div class="container text-center" id="start">
                         <div class="row align-items-end">
                             <div class="col">
-                                <?php echo "
+                                <!-- <?php echo "
                                     <a class='btn btn-warning' href='./update_profile.php?id=$row[alumni_id]'> Change Picture </a>
                                     ";
-                                ?>
+                                        ?> -->
                             </div>
                             <div class="col">
                                 <!-- Preview image -->
                                 <div class="form-control" style="width:225px;height:215px; border-radius: 100%;">
                                     <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($row['picture']); ?>" style="width:200px;height:200px; border-radius: 100%;">
+                                    
                                 </div>
                             </div>
                         </div>

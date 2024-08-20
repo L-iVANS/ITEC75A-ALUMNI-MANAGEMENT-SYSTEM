@@ -54,11 +54,18 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 }
 
 // Pagination configuration
-$records_per_page = 6; // Number of records to display per page
+$records_per_page = 10; // Number of records to display per page
 $current_page = isset($_GET['page']) ? $_GET['page'] : 1; // Get current page number, default to 1
 
 // Calculate the limit clause for SQL query
 $start_from = ($current_page - 1) * $records_per_page;
+
+// Sorting configuration
+$sort_order = "ASC"; // Default sort order
+
+if (isset($_GET['sort'])) {
+    $sort_order = $_GET['sort'] == "desc" ? "DESC" : "ASC";
+}
 
 // Initialize variables
 $sql = "SELECT * FROM alumni ";
@@ -82,9 +89,12 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
         $sql .= "OR gender = '$search_query' ";
     }
 }
-
-$sql .= "ORDER BY student_id ASC ";
+// Apply sorting
+$sql .= "ORDER BY lname $sort_order, fname $sort_order, mname $sort_order ";
+// Apply pagination
 $sql .= "LIMIT $start_from, $records_per_page";
+
+// $sql .= "ORDER BY student_id ASC ";
 
 $result = $conn->query($sql);
 
@@ -108,6 +118,10 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
         $sql .= "OR gender = '$search_query' ";
     }
 }
+
+
+
+
 $total_records_result = mysqli_query($conn, $total_records_query);
 $total_records_row = mysqli_fetch_array($total_records_result);
 $total_records = $total_records_row[0];
@@ -344,6 +358,7 @@ if (isset($_GET['ide'])) {
                     <div class="container-title">
                         <span>Records</span>
                     </div>
+
                     <div class="congainer-fluid" id="column-header">
                         <div class="row">
                             <div class="col">
@@ -375,7 +390,18 @@ if (isset($_GET['ide'])) {
 
                                 <tr>
                                     <th scope="col" class="inline">STUDENT ID</th>
-                                    <th scope="col" class="inline">NAME</th>
+                                    <th scope="col" class="inline">
+                                        <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>">
+                                            NAME
+                                            <?php if ($sort_order == 'ASC'): ?>
+                                                <i class="bi bi-arrow-up"></i>
+                                            <?php else: ?>
+                                                <i class="bi bi-arrow-down"></i>
+                                            <?php endif; ?>
+                                        </a>
+
+                                    </th>
+
                                     <th scope="col" class="inline">GENDER</th>
                                     <th scope="col" class="inline">COURSE</th>
                                     <th scope="col" class="inline">BATCH</th>
@@ -385,6 +411,7 @@ if (isset($_GET['ide'])) {
                                     <th scope="col" class="inline">DATE CREATION</th>
                                     <th scope="col" class="inline">ACTION</th>
                                 </tr>
+
                             </thead>
                             <tbody>
                                 <?php
@@ -407,7 +434,7 @@ if (isset($_GET['ide'])) {
                                             echo "
                                                 <td class='inline act'>
                                                     <a class='btn btn-danger btn-sm archive' href='./del_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Archive</a>
-                                                    <a class='btn btn-info btn-sm' href='./alumni_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Details</a>
+                                                    <a class='btn btn-outline-primary' href='./alumni_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Details</a>
                                                 </td>
                                             "; ?>
                                         </tr>
@@ -418,6 +445,23 @@ if (isset($_GET['ide'])) {
                                     echo '<tr><td colspan="12" style="text-align: center;">No records found</td></tr>';
                                 }
                                 ?>
+                                <div class="container" style="margin-bottom: 20px;">
+                                    <select class="form-control" name="course" id="course-filter" required>
+                                        <option value="" selected hidden disabled>Select a course</option>
+                                        <option value="BAJ">BAJ</option>
+                                        <option value="BECEd">BECEd</option>
+                                        <option value="BEEd">BEEd</option>
+                                        <option value="BSBM">BSBM</option>
+                                        <option value="BSOA">BSOA</option>
+                                        <option value="BSEntrep">BSEntrep</option>
+                                        <option value="BSHM">BSHM</option>
+                                        <option value="BSIT">BSIT</option>
+                                        <option value="BSCS">BSCS</option>
+                                        <option value="BSc(Psych)">BSc(Psych)</option>
+                                        <option value="">All Courses</option>
+
+                                    </select>
+                                    <br>
                             </tbody>
                         </table>
 
@@ -433,7 +477,7 @@ if (isset($_GET['ide'])) {
                             <?php endif; ?>
 
                             <?php if ($current_page < $total_pages) : ?>
-                                <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">Next &raquo;</a>
+                                <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#f7b205;color:white;margin-bottom:13px;">Next &raquo;</a>
                             <?php endif; ?>
                         </div>
                         <p style="margin-left:2%;margin-top:2.3%;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
@@ -446,113 +490,160 @@ if (isset($_GET['ide'])) {
                 </div>
             </div> -->
         </main>
-        <script>
-            document.addEventListener('DOMContentLoaded', (event) => {
-                let currentPage = 1;
+        <!-- <div class="container">
+            <select class="form-control" name="course" id="course-filter" required>
+                <option value="" selected hidden disabled>Select a course</option>
+                <option value="BAJ">BAJ</option>
+                <option value="BECEd">BECEd</option>
+                <option value="BEEd">BEEd</option>
+                <option value="BSBM">BSBM</option>
+                <option value="BSOA">BSOA</option>
+                <option value="BSEntrep">BSEntrep</option>
+                <option value="BSHM">BSHM</option>
+                <option value="BSIT">BSIT</option>
+                <option value="BSCS">BSCS</option>
+                <option value="BSc(Psych)">BSc(Psych)</option>
+                <option value="">All Courses</option>
 
-                function loadPage(page) {
-                    // Simulate an AJAX request to get page content
-                    const contentDiv = document.getElementById('content');
-                    contentDiv.innerHTML = `Content for page ${page}`; // Replace with actual AJAX call
-                    currentPage = page;
-                }
+            </select> -->
 
-                document.getElementById('prevPage').addEventListener('click', (event) => {
-                    event.preventDefault();
-                    if (currentPage > 1) {
-                        loadPage(currentPage - 1);
+            <script>
+                document.addEventListener('DOMContentLoaded', (event) => {
+                    let currentPage = 1;
+
+                    function loadPage(page) {
+                        // Simulate an AJAX request to get page content
+                        const contentDiv = document.getElementById('content');
+                        contentDiv.innerHTML = `Content for page ${page}`; // Replace with actual AJAX call
+                        currentPage = page;
                     }
+
+                    document.getElementById('prevPage').addEventListener('click', (event) => {
+                        event.preventDefault();
+                        if (currentPage > 1) {
+                            loadPage(currentPage - 1);
+                        }
+                    });
+
+                    document.getElementById('nextPage').addEventListener('click', (event) => {
+                        event.preventDefault();
+                        loadPage(currentPage + 1);
+                    });
+
+                    // Initial load
+                    loadPage(currentPage);
                 });
 
-                document.getElementById('nextPage').addEventListener('click', (event) => {
-                    event.preventDefault();
-                    loadPage(currentPage + 1);
-                });
+                // forsweetalert confirm
+                // Debugging: Ensure SweetAlert2 is loaded
+                document.addEventListener('DOMContentLoaded', function() {
+                    const archiveButtons = document.querySelectorAll('.archive');
 
-                // Initial load
-                loadPage(currentPage);
-            });
+                    archiveButtons.forEach(function(button) {
+                        button.addEventListener('click', function(event) {
+                            event.preventDefault(); // Prevent the default action (navigation)
 
-            // forsweetalert confirm
-            // Debugging: Ensure SweetAlert2 is loaded
-            document.addEventListener('DOMContentLoaded', function() {
-                const archiveButtons = document.querySelectorAll('.archive');
+                            const href = this.getAttribute('href'); // Get the href attribute
 
-                archiveButtons.forEach(function(button) {
-                    button.addEventListener('click', function(event) {
-                        event.preventDefault(); // Prevent the default action (navigation)
-
-                        const href = this.getAttribute('href'); // Get the href attribute
-
-                        Swal.fire({
-                            title: 'Do you want to continue?',
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#e03444',
-                            cancelButtonColor: '#ffc404',
-                            confirmButtonText: 'Continue'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = href; // Proceed with the navigation if confirmed
-                            }
+                            Swal.fire({
+                                title: 'Do you want to continue?',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#e03444',
+                                cancelButtonColor: '#ffc404',
+                                confirmButtonText: 'Continue'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = href; // Proceed with the navigation if confirmed
+                                }
+                            });
                         });
                     });
                 });
-            });
-        </script>
+            </script>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // document.getElementById('print-table-btn').addEventListener('click', function() {
-                //     var tableContent = document.querySelector('.table-content').innerHTML;
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // document.getElementById('print-table-btn').addEventListener('click', function() {
+                    //     var tableContent = document.querySelector('.table-content').innerHTML;
 
-                //     if (!tableContent) {
-                //         console.error('No content found for printing');
-                //         return; // Exit if no content found
-                //     }
+                    //     if (!tableContent) {
+                    //         console.error('No content found for printing');
+                    //         return; // Exit if no content found
+                    //     }
 
-                //     var printWindow = window.open('', '_blank', 'height=600,width=800');
+                    //     var printWindow = window.open('', '_blank', 'height=600,width=800');
 
-                //     if (!printWindow) {
-                //         console.error('Popup blocked');
-                //         return; // Exit if the popup was blocked
-                //     }
+                    //     if (!printWindow) {
+                    //         console.error('Popup blocked');
+                    //         return; // Exit if the popup was blocked
+                    //     }
 
-                //     printWindow.document.open();
-                //     printWindow.document.write('<html><head><title>Print Table</title>');
-                //     printWindow.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">');
-                //     printWindow.document.write('</head><body>');
-                //     printWindow.document.write('<table class="table table-striped table-bordered">');
-                //     printWindow.document.write(tableContent);
-                //     printWindow.document.write('</table>');
-                //     printWindow.document.write('</body></html>');
-                //     printWindow.document.close();
+                    //     printWindow.document.open();
+                    //     printWindow.document.write('<html><head><title>Print Table</title>');
+                    //     printWindow.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">');
+                    //     printWindow.document.write('</head><body>');
+                    //     printWindow.document.write('<table class="table table-striped table-bordered">');
+                    //     printWindow.document.write(tableContent);
+                    //     printWindow.document.write('</table>');
+                    //     printWindow.document.write('</body></html>');
+                    //     printWindow.document.close();
 
                     setTimeout(() => {
                         printWindow.print();
                         printWindow.close();
                     }, 1000);
                 });
-            
-        </script>
-        <script>
-    document.getElementById('print-table-btn').addEventListener('click', function() {
-        // Get the table content element
-        var tableContent = document.querySelector('.table-content');
+            </script>
+            <script>
+                document.getElementById('print-table-btn').addEventListener('click', function() {
+                    // Get the table content element
+                    var tableContent = document.querySelector('.table-content');
 
-        // Use html2pdf to generate and download the PDF
-        var opt = {
-            margin: 1,
-            filename: 'alumni_table.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'in', format: 'legal', orientation: 'landscape' }
-        };
+                    // Use html2pdf to generate and download the PDF
+                    var opt = {
+                        margin: 1,
+                        filename: 'alumni_table.pdf',
+                        image: {
+                            type: 'jpeg',
+                            quality: 0.98
+                        },
+                        html2canvas: {
+                            scale: 2
+                        },
+                        jsPDF: {
+                            unit: 'in',
+                            format: 'legal',
+                            orientation: 'landscape'
+                        }
+                    };
 
-        // Convert the table content to PDF
-        html2pdf().from(tableContent).set(opt).save();
-    });
-</script>
+                    // Convert the table content to PDF
+                    html2pdf().from(tableContent).set(opt).save();
+                });
+            </script>
+
+            <script>
+                document.getElementById('course-filter').addEventListener('change', function() {
+                    const selectedCourse = this.value.toLowerCase();
+                    const tableRows = document.querySelectorAll('table tbody tr');
+
+                    tableRows.forEach(row => {
+                        const courseCell = row.querySelector('td:nth-child(4)'); // Assuming the course is in the 4th column
+
+                        if (courseCell) {
+                            const courseText = courseCell.textContent.toLowerCase();
+
+                            if (selectedCourse === "" || courseText.includes(selectedCourse)) {
+                                row.style.display = ''; // Show the row
+                            } else {
+                                row.style.display = 'none'; // Hide the row
+                            }
+                        }
+                    });
+                });
+            </script>
+
 
 </body>
 

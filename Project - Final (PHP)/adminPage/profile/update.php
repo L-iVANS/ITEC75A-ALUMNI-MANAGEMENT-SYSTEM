@@ -53,6 +53,48 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     exit();
 }
 
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $admin_id = $_POST['admin_id'];
+    $fname = ucwords($_POST['fname']);
+    $mname = ucwords($_POST['mname']);
+    $lname = ucwords($_POST['lname']);
+    $contact = $_POST['contact'];
+    $email = strtolower($_POST['email']);
+
+    // Server-side validation for contact number length
+    if (strlen($contact) != 11) {
+        $errorMessage = "Contact number must be exactly 11 digits.";
+    } else {
+        // email and user existing check
+        $emailCheck = mysqli_query($conn, "SELECT * FROM admin WHERE email = '$email' AND admin_id != $admin_id");
+
+        if (mysqli_num_rows($emailCheck) > 0) {
+            $errorMessage = "Email Already Exists";
+        } else {
+            $sql = "UPDATE admin SET fname='$fname', mname='$mname', lname='$lname', contact='$contact', email='$email' WHERE admin_id = $admin_id";
+            $result = $conn->query($sql);
+
+            echo "
+                <script>
+                    // Wait for the document to load
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            title: 'Info Updated Successfully',
+                            timer: 2000,
+                            showConfirmButton: true, // Show the confirm button
+                            confirmButtonColor: '#4CAF50', // Set the button color to green
+                            confirmButtonText: 'OK' // Change the button text if needed
+                        }).then(function() {
+                            window.location.href = './profile.php';
+                        });
+                    });
+                </script>
+            ";
+        }
+    }
+}
+
+
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     // Show the data of alumni
@@ -270,25 +312,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                     </div>
                                     <div class="mb-3">
                                         <label for="formGroupExampleInput" class="form-label">CONTACT NUMBER</label>
-                                        <input type="number" name="contact" class="form-control" id="formGroupExampleInput" placeholder="Enter Contact Number" required value="<?php echo htmlspecialchars("$contact"); ?>">
+                                        <input type="number" name="contact" class="form-control" id="formGroupExampleInput" placeholder="Enter Contact Number" required value="<?php echo htmlspecialchars("$contact"); ?>" maxlength="11" oninput="limitContactLength(this)">
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="formGroupExampleInput" class="form-label">EMAIL ADDRESS</label>
-                                        <input type="email" name="email" class="form-control" id="formGroupExampleInput" placeholder="Enter Email Address" required value="<?php echo htmlspecialchars("$email"); ?>">
-                                    </div>
-                                    <div class="buttons">
-                                        <button type="submit" class="btn" id="button1" value="Update">UPDATE</button>
-                                        <a href="./profile.php"><button type="button" class="btn" id="button1">CANCEL</button></a>
-                                    </div>
-                                </form>
+
                             </div>
+                            <div class="mb-3">
+                                <label for="formGroupExampleInput" class="form-label">EMAIL ADDRESS</label>
+                                <input type="email" name="email" class="form-control" id="formGroupExampleInput" placeholder="Enter Email Address" required value="<?php echo htmlspecialchars("$email"); ?>">
+                            </div>
+                            <div class="buttons">
+                                <button type="submit" class="btn" id="button1" value="Update">UPDATE</button>
+                                <a href="./profile.php"><button type="button" class="btn" id="button1">CANCEL</button></a>
+                            </div>
+                            </form>
                         </div>
                     </div>
-
                 </div>
-            </div>
 
-            <!-- <script>
+            </div>
+    </div>
+
+    <!-- <script>
     let profilePic = document.getElementById("profile-pic");
     let inputFile = document.getElementById("input-file");
 
@@ -296,24 +340,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         profilePic.src = URL.createObjectURL(inputFile.files[0]);
     }
 </script> -->
-            <script>
-                function submitForm(form) {
-                    Swal.fire({
-                            title: 'Do you want to continue?',
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#e03444',
-                            cancelButtonColor: '#ffc404',
-                            confirmButtonText: 'Submit'
-                        })
-                        .then((result) => {
-                            if (result.isConfirmed) {
-                                form.submit(); // Submit the form
-                            }
-                        });
-                    return false; // Prevent default form submission
-                }
-            </script>
+    <script>
+        function submitForm(form) {
+            Swal.fire({
+                    title: 'Do you want to continue?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e03444',
+                    cancelButtonColor: '#ffc404',
+                    confirmButtonText: 'Submit'
+                })
+                .then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); // Submit the form
+                    }
+                });
+            return false; // Prevent default form submission
+        }
+    </script>
+    <script>
+        function limitContactLength(input) {
+            if (input.value.length > 11) {
+                input.value = input.value.slice(0, 11);
+            }
+        }
+    </script>
 </body>
 
 </html>
