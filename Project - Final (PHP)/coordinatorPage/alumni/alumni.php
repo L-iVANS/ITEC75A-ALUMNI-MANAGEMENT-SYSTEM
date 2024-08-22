@@ -83,6 +83,10 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : 1; // Get current page nu
 // Calculate the limit clause for SQL query
 $start_from = ($current_page - 1) * $records_per_page;
 
+$sort_order = "ASC";
+if (isset($_GET['sort'])) {
+    $sort_order = $_GET['sort'] == "desc" ? "DESC" : "ASC";
+}
 // Initialize variables
 $sql = "SELECT * FROM alumni ";
 
@@ -108,8 +112,11 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
     }
 }
 
-$sql .= "ORDER BY student_id ASC ";
-$sql .= "LIMIT $start_from, $records_per_page";
+$sort_column = "lname"; // Default sorting column
+if (isset($_GET['column'])) {
+    $sort_column = $_GET['column'];
+}
+$sql .= "ORDER BY $sort_column $sort_order LIMIT $start_from, $records_per_page";
 
 $result = $conn->query($sql);
 
@@ -384,7 +391,7 @@ if (isset($_GET['ide'])) {
                                         <div class="search">
 
                                             <form class="d-flex" role="search">
-                                                <div class="container-fluid" id="search" >
+                                                <div class="container-fluid" id="search">
                                                     <input class="form-control me-2" type="search" name="query" placeholder="Search Records..." aria-label="Search" value="<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>">
                                                     <button class="btn btn-outline-success" type="submit" style="padding-left: 30px; padding-right: 39px;">Search</button>
                                                 </div>
@@ -408,7 +415,36 @@ if (isset($_GET['ide'])) {
 
                                         <tr>
                                             <th scope="col" class="inline">STUDENT ID</th>
-                                            <th scope="col" class="inline">NAME</th>
+                                            <th scope="col" class="inline">
+                                                <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>&column=lname">
+                                                    Last Name
+                                                    <?php if (isset($_GET['column']) && $_GET['column'] == 'lname' && $sort_order == 'ASC'): ?>
+                                                        <i class="bi bi-arrow-up"></i>
+                                                    <?php elseif (isset($_GET['column']) && $_GET['column'] == 'lname' && $sort_order == 'DESC'): ?>
+                                                        <i class="bi bi-arrow-down"></i>
+                                                    <?php endif; ?>
+                                                </a>
+                                            </th>
+                                            <th scope="col" class="inline">
+                                                <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>&column=fname">
+                                                    First Name
+                                                    <?php if (isset($_GET['column']) && $_GET['column'] == 'fname' && $sort_order == 'ASC'): ?>
+                                                        <i class="bi bi-arrow-up"></i>
+                                                    <?php elseif (isset($_GET['column']) && $_GET['column'] == 'fname' && $sort_order == 'DESC'): ?>
+                                                        <i class="bi bi-arrow-down"></i>
+                                                    <?php endif; ?>
+                                                </a>
+                                            </th>
+                                            <th scope="col" class="inline">
+                                                <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>&column=mname">
+                                                    Middle Name
+                                                    <?php if (isset($_GET['column']) && $_GET['column'] == 'mname' && $sort_order == 'ASC'): ?>
+                                                        <i class="bi bi-arrow-up"></i>
+                                                    <?php elseif (isset($_GET['column']) && $_GET['column'] == 'mname' && $sort_order == 'DESC'): ?>
+                                                        <i class="bi bi-arrow-down"></i>
+                                                    <?php endif; ?>
+                                                </a>
+                                            </th>
                                             <th scope="col" class="inline">GENDER</th>
                                             <th scope="col" class="inline">COURSE</th>
                                             <th scope="col" class="inline">BATCH</th>
@@ -428,7 +464,9 @@ if (isset($_GET['ide'])) {
                                         ?>
                                                 <tr>
                                                     <td class="inline"><?php echo $row['student_id'] ?></td>
-                                                    <td class="inline"><?php echo htmlspecialchars($fullname) ?></td>
+                                                    <td class="inline"><?php echo $row['lname'] ?></td>
+                                                    <td class="inline"><?php echo $row['fname'] ?></td>
+                                                    <td class="inline"><?php echo $row['mname'] ?></td>
                                                     <td class="inline"><?php echo $row['gender'] ?></td>
                                                     <td class="inline"><?php echo $row['course'] ?></td>
                                                     <td class="inline"><?php echo htmlspecialchars($batch) ?></td>
@@ -440,7 +478,7 @@ if (isset($_GET['ide'])) {
                                                     echo "
                                                 <td class='inline act'>
                                                     <a class='btn btn-danger btn-sm archive' href='./del_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Archive</a>
-                                                    <a class='btn btn-info btn-sm' href='./alumni_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>More Info</a>
+                                                    <a class='btn btn-outline-primary' href='./alumni_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Details</a>
                                                 </td>
                                             "; ?>
                                                 </tr>
@@ -466,7 +504,7 @@ if (isset($_GET['ide'])) {
                                     <?php endif; ?>
 
                                     <?php if ($current_page < $total_pages) : ?>
-                                        <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">Next &raquo;</a>
+                                        <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#f7b205;color:white;margin-bottom:13px;">Next &raquo;</a>
                                     <?php endif; ?>
                                 </div>
                                 <p style="margin-left:2%;margin-top:2.3%;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
@@ -541,7 +579,7 @@ if (isset($_GET['ide'])) {
                 const tableRows = document.querySelectorAll('table tbody tr');
 
                 tableRows.forEach(row => {
-                    const genderCell = row.querySelector('td:nth-child(3)'); // Gender is in the 3rd column
+                    const genderCell = row.querySelector('td:nth-child(5)'); // Gender is in the 3rd column
 
                     if (genderCell) {
                         const genderText = genderCell.textContent.toLowerCase().trim(); // Trim any whitespace
