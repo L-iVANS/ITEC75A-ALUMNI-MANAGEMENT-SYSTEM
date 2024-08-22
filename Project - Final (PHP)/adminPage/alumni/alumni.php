@@ -90,9 +90,19 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
     }
 }
 // Apply sorting
-$sql .= "ORDER BY lname $sort_order, fname $sort_order, mname $sort_order ";
+// Default sorting column
+$sort_column = "lname"; // Default sort by last name
+
+// Check if a specific column is set for sorting
+if (isset($_GET['column'])) {
+    $sort_column = $_GET['column'];
+}
+
+// Apply sorting
+$sql .= "ORDER BY $sort_column $sort_order ";
 // Apply pagination
 $sql .= "LIMIT $start_from, $records_per_page";
+
 
 // $sql .= "ORDER BY student_id ASC ";
 
@@ -356,96 +366,14 @@ if (isset($_GET['ide'])) {
             <div class="container-fluid" id="main-container">
                 <div class="container-fluid" id="content-container">
                     <div class="container-title">
-                        <span>Records</span>
+                        <span>
+                            <h2>Alumni Records</h2>
+                        </span>
                     </div>
-
-                    <div class="congainer-fluid" id="column-header">
+                    <div class="container-fluid">
                         <div class="row">
                             <div class="col">
-                                <div class="search">
-
-                                    <form class="d-flex" role="search">
-                                        <div class="container-fluid" id="search">
-                                            <input class="form-control me-2" type="search" name="query" placeholder="Search Records..." aria-label="Search" value="<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>">
-                                            <button class="btn btn-outline-success" type="submit" style="padding-left: 30px; padding-right: 39px;">Search</button>
-                                        </div>
-                                    </form>
-
-                                </div>
-                            </div>
-                            <div class="col" style="text-align: end;">
-                                <div class="add-button">
-                                    <a style="text-decoration: none;" href='./add_alumni.php'>
-                                        <button id="add-new-btn">Add New +</button>
-                                    </a>
-                                    <a class='btn btn-secondary border border-dark' href='./pendingAccount/pending.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Pending Account</a>
-                                    <button id="print-table-btn" class="btn btn-primary">Print Table</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="table-content">
-                        <table id="example" class="table-responsive table table-striped table-hover ">
-                            <thead>
-
-                                <tr>
-                                    <th scope="col" class="inline">STUDENT ID</th>
-                                    <th scope="col" class="inline">
-                                        <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>">
-                                            NAME
-                                            <?php if ($sort_order == 'ASC'): ?>
-                                                <i class="bi bi-arrow-up"></i>
-                                            <?php else: ?>
-                                                <i class="bi bi-arrow-down"></i>
-                                            <?php endif; ?>
-                                        </a>
-
-                                    </th>
-
-                                    <th scope="col" class="inline">GENDER</th>
-                                    <th scope="col" class="inline">COURSE</th>
-                                    <th scope="col" class="inline">BATCH</th>
-                                    <th scope="col" class="inline">CONTACT</th>
-                                    <th scope="col" class="inline">ADDRESS</th>
-                                    <th scope="col" class="inline">EMAIL</th>
-                                    <th scope="col" class="inline">DATE CREATION</th>
-                                    <th scope="col" class="inline">ACTION</th>
-                                </tr>
-
-                            </thead>
-                            <tbody>
-                                <?php
-                                if ($result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        $fullname = $row["fname"] . " " . $row["mname"] . " " . $row["lname"];
-                                        $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
-                                ?>
-                                        <tr>
-                                            <td class="inline"><?php echo $row['student_id'] ?></td>
-                                            <td class="inline"><?php echo htmlspecialchars($fullname) ?></td>
-                                            <td class="inline"><?php echo $row['gender'] ?></td>
-                                            <td class="inline"><?php echo $row['course'] ?></td>
-                                            <td class="inline"><?php echo htmlspecialchars($batch) ?></td>
-                                            <td class="inline"><?php echo $row['contact'] ?></td>
-                                            <td class="inline"><?php echo $row['address'] ?></td>
-                                            <td class="inline"><?php echo $row['email'] ?></td>
-                                            <td class="inline"><?php echo $row['date_created'] ?></td>
-                                            <?php
-                                            echo "
-                                                <td class='inline act'>
-                                                    <a class='btn btn-danger btn-sm archive' href='./del_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Archive</a>
-                                                    <a class='btn btn-outline-primary' href='./alumni_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Details</a>
-                                                </td>
-                                            "; ?>
-                                        </tr>
-                                <?php
-                                    }
-                                } else {
-                                    $current_page = 0;
-                                    echo '<tr><td colspan="12" style="text-align: center;">No records found</td></tr>';
-                                }
-                                ?>
-                                <div class="container" style="margin-bottom: 20px;">
+                                <div class="container" style="margin-bottom:0px; margin-top: 10px;">
                                     <select class="form-control" name="course" id="course-filter" required>
                                         <option value="" selected hidden disabled>Select a course</option>
                                         <option value="BAJ">BAJ</option>
@@ -459,32 +387,142 @@ if (isset($_GET['ide'])) {
                                         <option value="BSCS">BSCS</option>
                                         <option value="BSc(Psych)">BSc(Psych)</option>
                                         <option value="">All Courses</option>
-
                                     </select>
                                     <br>
-                            </tbody>
-                        </table>
-
-                    </div>
-
-                    <div>
-                        <!-- Pagination links -->
-                        <div class="pagination" id="content" style="float:right; margin-right:1.5%">
-                            <!-- next and previous -->
-                            <?php
-                            if ($current_page > 1) : ?>
-                                <a href="?page=<?= ($current_page - 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="prev" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">&laquo; Previous</a>
-                            <?php endif; ?>
-
-                            <?php if ($current_page < $total_pages) : ?>
-                                <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#f7b205;color:white;margin-bottom:13px;">Next &raquo;</a>
-                            <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="col">
+                                
+                            </div>
                         </div>
-                        <p style="margin-left:2%;margin-top:2.3%;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
+                        <div class="congainer-fluid" id="column-header">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="search">
+
+                                        <form class="d-flex" role="search">
+                                            <div class="container-fluid" id="search">
+                                                <input class="form-control me-2" type="search" name="query" placeholder="Search Records..." aria-label="Search" value="<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>">
+                                                <button class="btn btn-outline-success" type="submit" style="padding-left: 30px; padding-right: 39px;">Search</button>
+                                            </div>
+                                        </form>
+
+                                    </div>
+                                </div>
+                                <div class="col" style="text-align: end;">
+                                    <div class="add-button">
+                                        <a style="text-decoration: none;" href='./add_alumni.php'>
+                                            <button id="add-new-btn">Add New +</button>
+                                        </a>
+                                        <a class='btn btn-secondary border border-dark' href='./pendingAccount/pending.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Pending Account</a>
+                                        <button id="print-table-btn" class="btn btn-primary">Print Table</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-content">
+                            <table id="example" class="table-responsive table table-striped table-hover ">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="inline">STUDENT ID</th>
+                                        <th scope="col" class="inline">
+                                            <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>&column=lname">
+                                                Last Name
+                                                <?php if (isset($_GET['column']) && $_GET['column'] == 'lname' && $sort_order == 'ASC'): ?>
+                                                    <i class="bi bi-arrow-up"></i>
+                                                <?php elseif (isset($_GET['column']) && $_GET['column'] == 'lname' && $sort_order == 'DESC'): ?>
+                                                    <i class="bi bi-arrow-down"></i>
+                                                <?php endif; ?>
+                                            </a>
+                                        </th>
+                                        <th scope="col" class="inline">
+                                            <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>&column=fname">
+                                                First Name
+                                                <?php if (isset($_GET['column']) && $_GET['column'] == 'fname' && $sort_order == 'ASC'): ?>
+                                                    <i class="bi bi-arrow-up"></i>
+                                                <?php elseif (isset($_GET['column']) && $_GET['column'] == 'fname' && $sort_order == 'DESC'): ?>
+                                                    <i class="bi bi-arrow-down"></i>
+                                                <?php endif; ?>
+                                            </a>
+                                        </th>
+                                        <th scope="col" class="inline">
+                                            <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>&column=mname">
+                                                Middle Name
+                                                <?php if (isset($_GET['column']) && $_GET['column'] == 'mname' && $sort_order == 'ASC'): ?>
+                                                    <i class="bi bi-arrow-up"></i>
+                                                <?php elseif (isset($_GET['column']) && $_GET['column'] == 'mname' && $sort_order == 'DESC'): ?>
+                                                    <i class="bi bi-arrow-down"></i>
+                                                <?php endif; ?>
+                                            </a>
+                                        </th>
+                                        <th scope="col" class="inline">GENDER</th>
+                                        <th scope="col" class="inline">COURSE</th>
+                                        <th scope="col" class="inline">BATCH</th>
+                                        <th scope="col" class="inline">CONTACT</th>
+                                        <th scope="col" class="inline">ADDRESS</th>
+                                        <th scope="col" class="inline">EMAIL</th>
+                                        <th scope="col" class="inline">DATE CREATION</th>
+                                        <th scope="col" class="inline">ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    if ($result->num_rows > 0) {
+                                        while ($row = $result->fetch_assoc()) {
+                                            $fullname = $row["fname"] . " " . $row["mname"] . " " . $row["lname"];
+                                            $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
+                                    ?>
+                                            <tr>
+                                                <td class="inline"><?php echo $row['student_id'] ?></td>
+                                                <td class="inline"><?php echo $row['lname'] ?></td>
+                                                <td class="inline"><?php echo $row['fname'] ?></td>
+                                                <td class="inline"><?php echo $row['mname'] ?></td>
+                                                <td class="inline"><?php echo $row['gender'] ?></td>
+                                                <td class="inline"><?php echo $row['course'] ?></td>
+                                                <td class="inline"><?php echo htmlspecialchars($batch) ?></td>
+                                                <td class="inline"><?php echo $row['contact'] ?></td>
+                                                <td class="inline"><?php echo $row['address'] ?></td>
+                                                <td class="inline"><?php echo $row['email'] ?></td>
+                                                <td class="inline"><?php echo $row['date_created'] ?></td>
+                                                <?php
+                                                echo "
+                                                <td class='inline act'>
+                                                    <a class='btn btn-danger btn-sm archive' href='./del_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Archive</a>
+                                                    <a class='btn btn-outline-primary' href='./alumni_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Details</a>
+                                                </td>
+                                            "; ?>
+                                            </tr>
+                                    <?php
+                                        }
+                                    } else {
+                                        $current_page = 0;
+                                        echo '<tr><td colspan="12" style="text-align: center;">No records found</td></tr>';
+                                    }
+                                    ?>
+
+                                </tbody>
+                            </table>
+
+                        </div>
+
+                        <div>
+                            <!-- Pagination links -->
+                            <div class="pagination" id="content" style="float:right; margin-right:1.5%">
+                                <!-- next and previous -->
+                                <?php
+                                if ($current_page > 1) : ?>
+                                    <a href="?page=<?= ($current_page - 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="prev" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">&laquo; Previous</a>
+                                <?php endif; ?>
+
+                                <?php if ($current_page < $total_pages) : ?>
+                                    <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#f7b205;color:white;margin-bottom:13px;">Next &raquo;</a>
+                                <?php endif; ?>
+                            </div>
+                            <p style="margin-left:2%;margin-top:2.3%;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <!-- <div class="container-fluid" id="main-container">
+                <!-- <div class="container-fluid" id="main-container">
                 <div class="container-fluid" id="content-container">
                     
                 </div>
@@ -507,142 +545,142 @@ if (isset($_GET['ide'])) {
 
             </select> -->
 
-            <script>
-                document.addEventListener('DOMContentLoaded', (event) => {
-                    let currentPage = 1;
+        <script>
+            document.addEventListener('DOMContentLoaded', (event) => {
+                let currentPage = 1;
 
-                    function loadPage(page) {
-                        // Simulate an AJAX request to get page content
-                        const contentDiv = document.getElementById('content');
-                        contentDiv.innerHTML = `Content for page ${page}`; // Replace with actual AJAX call
-                        currentPage = page;
+                function loadPage(page) {
+                    // Simulate an AJAX request to get page content
+                    const contentDiv = document.getElementById('content');
+                    contentDiv.innerHTML = `Content for page ${page}`; // Replace with actual AJAX call
+                    currentPage = page;
+                }
+
+                document.getElementById('prevPage').addEventListener('click', (event) => {
+                    event.preventDefault();
+                    if (currentPage > 1) {
+                        loadPage(currentPage - 1);
                     }
-
-                    document.getElementById('prevPage').addEventListener('click', (event) => {
-                        event.preventDefault();
-                        if (currentPage > 1) {
-                            loadPage(currentPage - 1);
-                        }
-                    });
-
-                    document.getElementById('nextPage').addEventListener('click', (event) => {
-                        event.preventDefault();
-                        loadPage(currentPage + 1);
-                    });
-
-                    // Initial load
-                    loadPage(currentPage);
                 });
 
-                // forsweetalert confirm
-                // Debugging: Ensure SweetAlert2 is loaded
-                document.addEventListener('DOMContentLoaded', function() {
-                    const archiveButtons = document.querySelectorAll('.archive');
+                document.getElementById('nextPage').addEventListener('click', (event) => {
+                    event.preventDefault();
+                    loadPage(currentPage + 1);
+                });
 
-                    archiveButtons.forEach(function(button) {
-                        button.addEventListener('click', function(event) {
-                            event.preventDefault(); // Prevent the default action (navigation)
+                // Initial load
+                loadPage(currentPage);
+            });
 
-                            const href = this.getAttribute('href'); // Get the href attribute
+            // forsweetalert confirm
+            // Debugging: Ensure SweetAlert2 is loaded
+            document.addEventListener('DOMContentLoaded', function() {
+                const archiveButtons = document.querySelectorAll('.archive');
 
-                            Swal.fire({
-                                title: 'Do you want to continue?',
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonColor: '#e03444',
-                                cancelButtonColor: '#ffc404',
-                                confirmButtonText: 'Continue'
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    window.location.href = href; // Proceed with the navigation if confirmed
-                                }
-                            });
+                archiveButtons.forEach(function(button) {
+                    button.addEventListener('click', function(event) {
+                        event.preventDefault(); // Prevent the default action (navigation)
+
+                        const href = this.getAttribute('href'); // Get the href attribute
+
+                        Swal.fire({
+                            title: 'Do you want to continue?',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#e03444',
+                            cancelButtonColor: '#ffc404',
+                            confirmButtonText: 'Continue'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = href; // Proceed with the navigation if confirmed
+                            }
                         });
                     });
                 });
-            </script>
+            });
+        </script>
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    // document.getElementById('print-table-btn').addEventListener('click', function() {
-                    //     var tableContent = document.querySelector('.table-content').innerHTML;
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // document.getElementById('print-table-btn').addEventListener('click', function() {
+                //     var tableContent = document.querySelector('.table-content').innerHTML;
 
-                    //     if (!tableContent) {
-                    //         console.error('No content found for printing');
-                    //         return; // Exit if no content found
-                    //     }
+                //     if (!tableContent) {
+                //         console.error('No content found for printing');
+                //         return; // Exit if no content found
+                //     }
 
-                    //     var printWindow = window.open('', '_blank', 'height=600,width=800');
+                //     var printWindow = window.open('', '_blank', 'height=600,width=800');
 
-                    //     if (!printWindow) {
-                    //         console.error('Popup blocked');
-                    //         return; // Exit if the popup was blocked
-                    //     }
+                //     if (!printWindow) {
+                //         console.error('Popup blocked');
+                //         return; // Exit if the popup was blocked
+                //     }
 
-                    //     printWindow.document.open();
-                    //     printWindow.document.write('<html><head><title>Print Table</title>');
-                    //     printWindow.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">');
-                    //     printWindow.document.write('</head><body>');
-                    //     printWindow.document.write('<table class="table table-striped table-bordered">');
-                    //     printWindow.document.write(tableContent);
-                    //     printWindow.document.write('</table>');
-                    //     printWindow.document.write('</body></html>');
-                    //     printWindow.document.close();
+                //     printWindow.document.open();
+                //     printWindow.document.write('<html><head><title>Print Table</title>');
+                //     printWindow.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">');
+                //     printWindow.document.write('</head><body>');
+                //     printWindow.document.write('<table class="table table-striped table-bordered">');
+                //     printWindow.document.write(tableContent);
+                //     printWindow.document.write('</table>');
+                //     printWindow.document.write('</body></html>');
+                //     printWindow.document.close();
 
-                    setTimeout(() => {
-                        printWindow.print();
-                        printWindow.close();
-                    }, 1000);
-                });
-            </script>
-            <script>
-                document.getElementById('print-table-btn').addEventListener('click', function() {
-                    // Get the table content element
-                    var tableContent = document.querySelector('.table-content');
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 1000);
+            });
+        </script>
+        <script>
+            document.getElementById('print-table-btn').addEventListener('click', function() {
+                // Get the table content element
+                var tableContent = document.querySelector('.table-content');
 
-                    // Use html2pdf to generate and download the PDF
-                    var opt = {
-                        margin: 1,
-                        filename: 'alumni_table.pdf',
-                        image: {
-                            type: 'jpeg',
-                            quality: 0.98
-                        },
-                        html2canvas: {
-                            scale: 2
-                        },
-                        jsPDF: {
-                            unit: 'in',
-                            format: 'legal',
-                            orientation: 'landscape'
+                // Use html2pdf to generate and download the PDF
+                var opt = {
+                    margin: 1,
+                    filename: 'alumni_table.pdf',
+                    image: {
+                        type: 'jpeg',
+                        quality: 0.98
+                    },
+                    html2canvas: {
+                        scale: 2
+                    },
+                    jsPDF: {
+                        unit: 'in',
+                        format: 'legal',
+                        orientation: 'landscape'
+                    }
+                };
+
+                // Convert the table content to PDF
+                html2pdf().from(tableContent).set(opt).save();
+            });
+        </script>
+
+        <script>
+            document.getElementById('course-filter').addEventListener('change', function() {
+                const selectedCourse = this.value.toLowerCase();
+                const tableRows = document.querySelectorAll('table tbody tr');
+
+                tableRows.forEach(row => {
+                    const courseCell = row.querySelector('td:nth-child(4)'); // Assuming the course is in the 4th column
+
+                    if (courseCell) {
+                        const courseText = courseCell.textContent.toLowerCase();
+
+                        if (selectedCourse === "" || courseText.includes(selectedCourse)) {
+                            row.style.display = ''; // Show the row
+                        } else {
+                            row.style.display = 'none'; // Hide the row
                         }
-                    };
-
-                    // Convert the table content to PDF
-                    html2pdf().from(tableContent).set(opt).save();
+                    }
                 });
-            </script>
-
-            <script>
-                document.getElementById('course-filter').addEventListener('change', function() {
-                    const selectedCourse = this.value.toLowerCase();
-                    const tableRows = document.querySelectorAll('table tbody tr');
-
-                    tableRows.forEach(row => {
-                        const courseCell = row.querySelector('td:nth-child(4)'); // Assuming the course is in the 4th column
-
-                        if (courseCell) {
-                            const courseText = courseCell.textContent.toLowerCase();
-
-                            if (selectedCourse === "" || courseText.includes(selectedCourse)) {
-                                row.style.display = ''; // Show the row
-                            } else {
-                                row.style.display = 'none'; // Hide the row
-                            }
-                        }
-                    });
-                });
-            </script>
+            });
+        </script>
 
 
 </body>
