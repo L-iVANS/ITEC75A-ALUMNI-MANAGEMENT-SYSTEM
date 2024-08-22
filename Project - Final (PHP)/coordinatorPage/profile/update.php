@@ -265,7 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                     </div>
                                     <div class="mb-3">
                                         <label for="formGroupExampleInput" class="form-label">CONTACT NUMBER</label>
-                                        <input type="number" name="contact" class="form-control" id="formGroupExampleInput" placeholder="Enter Contact Number" required value="<?php echo htmlspecialchars("$contact"); ?>">
+                                        <input type="number" name="contact" class="form-control" id="formGroupExampleInput" placeholder="Enter Contact Number" required value="<?php echo htmlspecialchars("$contact"); ?>" maxlength="11" oninput="limitContactLength(this)">
                                     </div>
                                     <div class="mb-3">
                                         <label for="formGroupExampleInput" class="form-label">EMAIL ADDRESS</label>
@@ -307,6 +307,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                             }
                         });
                     return false; // Prevent default form submission
+                }
+            </script>
+            <script>
+                function limitContactLength(input) {
+                    if (input.value.length > 11) {
+                        input.value = input.value.slice(0, 11);
+                    }
                 }
             </script>
 </body>

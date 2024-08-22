@@ -281,7 +281,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
     $idCheck_decline = mysqli_query($conn, "SELECT * FROM declined_account WHERE student_id='$stud_id'");
 
 
-    
+
     if (mysqli_num_rows($emailCheck) > 0) {
         echo "
             <script>
@@ -298,7 +298,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>
         ";
-        
     } else if (mysqli_num_rows($emailCheck_archive) > 0) {
         echo "
             <script>
@@ -315,7 +314,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>
         ";
-        
     } else if (mysqli_num_rows($idCheck) > 0) {
         echo "
             <script>
@@ -366,10 +364,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
         ";
     } else {
 
-            // Check if new password and confirm password match
-            if ($password !== $confirm_password) {
-                // $errorMessage = "New password and confirm password do not match.";
-                echo "<script>
+        // Check if new password and confirm password match
+        if ($password !== $confirm_password) {
+            // $errorMessage = "New password and confirm password do not match.";
+            echo "<script>
                 // Wait for the document to load
                 document.addEventListener('DOMContentLoaded', function() {
                     // Use SweetAlert2 for the alert
@@ -382,9 +380,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                     });
                 });
             </script>";
-    } else if (mysqli_num_rows($emailCheck_decline) > 0) {
-        
-        echo "
+        } else if (mysqli_num_rows($emailCheck_decline) > 0) {
+
+            echo "
             <script>
                 // Wait for the document to load
                 document.addEventListener('DOMContentLoaded', function() {
@@ -399,52 +397,68 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>
         ";
-    } else if (mysqli_num_rows($idCheck_pending) > 0) {
-        echo "
-            <script>
-                // Wait for the document to load
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Student ID Already Exists',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    });
-                });
-            </script>
-        ";
-        
-    } else if (mysqli_num_rows($idCheck_decline) > 0) {
-        echo "
-            <script>
-                // Wait for the document to load
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Student ID Already Exists',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    });
-                });
-            </script>
-        ";
-    } else {
-
-
-        $filePath = '../assets/profile_icon.jpg';
-        $imageData = file_get_contents($filePath);
-        $imageDataEscaped = addslashes($imageData);
-
-        $sql = "INSERT INTO pending SET student_id='$stud_id', fname='$fname', mname='$mname', lname='$lname', gender='$gender', course='$course', batch_startYear='$fromYear', batch_endYear='$toYear', contact='$contact', address='$address', email='$email', password='$password', picture='$imageDataEscaped'";
-        $result = $conn->query($sql);
-
-        if ($result) {
-            // $successMessage = "Coordinator Edited Successfully";
+        } else if (mysqli_num_rows($idCheck_pending) > 0) {
             echo "
+            <script>
+                // Wait for the document to load
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                            title: 'Student ID Already Exists',
+                            timer: 2000,
+                            showConfirmButton: true, // Show the confirm button
+                            confirmButtonColor: '#4CAF50', // Set the button color to green
+                            confirmButtonText: 'OK' // Change the button text if needed
+                    });
+                });
+            </script>
+        ";
+        if (strlen($stud_id) > 10 || !ctype_digit($stud_id)) {
+            echo "
+            <script>
+                // Wait for the document to load
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                        title: 'Student ID must be a number and cannot exceed 10 digits',
+                        timer: 2000,
+                        showConfirmButton: true, 
+                        confirmButtonColor: '#4CAF50', 
+                        confirmButtonText: 'OK' 
+                    });
+                });
+            </script>
+        ";
+        }
+        } else if (mysqli_num_rows($idCheck_decline) > 0) {
+            echo "
+            <script>
+                // Wait for the document to load
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                            title: 'Student ID Already Exists',
+                            timer: 2000,
+                            showConfirmButton: true, // Show the confirm button
+                            confirmButtonColor: '#4CAF50', // Set the button color to green
+                            confirmButtonText: 'OK' // Change the button text if needed
+                    });
+                });
+            </script>
+        ";
+        } else {
+
+
+            $filePath = '../assets/profile_icon.jpg';
+            $imageData = file_get_contents($filePath);
+            $imageDataEscaped = addslashes($imageData);
+
+            $sql = "INSERT INTO pending SET student_id='$stud_id', fname='$fname', mname='$mname', lname='$lname', gender='$gender', course='$course', batch_startYear='$fromYear', batch_endYear='$toYear', contact='$contact', address='$address', email='$email', password='$password', picture='$imageDataEscaped'";
+            $result = $conn->query($sql);
+
+            if ($result) {
+                // $successMessage = "Coordinator Edited Successfully";
+                echo "
             <script>
                 // Wait for the document to load
                 document.addEventListener('DOMContentLoaded', function() {
@@ -462,7 +476,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>
             ";
-        }
+            }
         }
     }
 }
@@ -538,7 +552,7 @@ function check_alumni($conn, $table, $log_email, $pass)
                     <!-- <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" /> -->
                 </div>
                 <div class="infield">
-                    <input type="number" placeholder="Student ID" name="student_id" value="<?php echo htmlspecialchars($stud_id); ?>" required />
+                    <input type="number" placeholder="Student ID" maxlength="10" required pattern="\d{1,10}" title="Student ID must be between 1 and 10 digits" name="student_id" value="<?php echo htmlspecialchars($stud_id); ?>" required />
                     <label></label>
                 </div>
                 <div class="infield">
@@ -882,8 +896,36 @@ function check_alumni($conn, $table, $log_email, $pass)
                 toggleIcon.src = 'eye-close.png'; // Use the image for hiding password
             }
         }
+
+
     </script>
-    
+<script>
+            document.getElementById('student_id').addEventListener('input', function() {
+            const maxLength = 10;
+            const value = this.value;
+
+            // Check if the value exceeds the max length
+            if (value.length > maxLength) {
+                this.value = value.slice(0, maxLength); // Trim the value to the max length
+            }
+        });
+
+        document.querySelector('form').addEventListener('submit', function(event) {
+            const studentId = document.getElementById('student_id').value;
+
+            // Prevent form submission if the Student ID exceeds 10 digits
+            if (studentId.length > 10) {
+                event.preventDefault(); // Stop the form from submitting
+                Swal.fire({
+                    title: 'Student ID must be 10 digits or less',
+                    timer: 2000,
+                    showConfirmButton: true,
+                    confirmButtonColor: '#4CAF50',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+</script>
 </body>
 
 </html>
