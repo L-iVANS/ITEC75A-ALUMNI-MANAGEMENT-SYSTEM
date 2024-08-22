@@ -1,12 +1,8 @@
 <?php
 session_start();
+$conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
-$servername = "localhost";
-$db_username = "root";
-$db_password = "";
-$db_name = "alumni_management_system";
-$conn = new mysqli($servername, $db_username, $db_password, $db_name);
-
+// SESSION
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
     $account_email = $_SESSION['user_email'];
@@ -36,6 +32,18 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     }
     $stmt->close();
 
+    // Check if user is a alumni_archive
+    $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
+    $stmt->bind_param("ss", $account, $account_email);
+    $stmt->execute();
+    $user_result = $stmt->get_result();
+
+    if ($user_result->num_rows > 0) {
+        session_destroy();
+        header("Location: ../../homepage.php");
+    }
+    $stmt->close();
+
     // Check if user is an alumni
     $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
     $stmt->bind_param("ss", $account, $account_email);
@@ -43,18 +51,33 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $user_result = $stmt->get_result();
 
     if ($user_result->num_rows > 0) {
-        // User is an alumni
-        header('Location: ../../alumniPage/dashboard_user.php');
-        exit();
+        $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
+        $result = $conn->query($sql);
+        $row = $result->fetch_assoc();
+
+        if ($row['status'] == "Verified") {
+            // User is a verified alumni
+            header('Location: ../../alumniPage/dashboard_user.php');
+            exit();
+        } else {
+
+            $_SESSION['email'] = $account_email;
+            $_SESSION['alert'] = 'Unverified';
+            sleep(2);
+            header('Location: ../../loginPage/verification_code.php');
+            exit();
+        }
     }
-    $stmt->close();
-    
 } else {
+    // Redirect to login if no matching user found
+    session_destroy();
     header('Location: ../../homepage.php');
     exit();
 }
+
+
 // Pagination configuration
-$records_per_page = 6; // Number of records to display per page
+$records_per_page = 10; // Number of records to display per page
 $current_page = isset($_GET['page']) ? $_GET['page'] : 1; // Get current page number, default to 1
 
 // Calculate the limit clause for SQL query
@@ -64,17 +87,25 @@ $start_from = ($current_page - 1) * $records_per_page;
 $sql = "SELECT * FROM alumni ";
 
 // Check if search query is provided
+$sql = "SELECT * FROM alumni WHERE 1=1 "; // Using 1=1 to allow easy appending of additional conditions
+
+// Check if search query is provided
 if (isset($_GET['query']) && !empty($_GET['query'])) {
     $search_query = $_GET['query'];
-    // Modify SQL query to include search filter
-    $sql .= "WHERE alumni_id LIKE '%$search_query%' 
-            OR fname LIKE '%$search_query%' 
-            OR mname LIKE '%$search_query%' 
-            OR lname LIKE '%$search_query%'
-            OR address LIKE '%$search_query%'
-            OR email LIKE '%$search_query%' 
-            OR course LIKE '%$search_query%'
-            OR (gender LIKE '%$search_query%' AND gender != 'fe') ";
+    $sql .= "AND (student_id LIKE '%$search_query%' 
+                OR fname LIKE '%$search_query%' 
+                OR mname LIKE '%$search_query%' 
+                OR lname LIKE '%$search_query%'
+                OR address LIKE '%$search_query%'
+                OR email LIKE '%$search_query%' 
+                OR course LIKE '%$search_query%'
+                OR CONCAT(batch_startYear, ' - ', batch_endYear) LIKE '%$search_query%'
+                OR date_created LIKE '%$search_query%'
+                OR contact LIKE '%$search_query%') ";
+
+    if (strtolower($search_query) === 'male' || strtolower($search_query) === 'female') {
+        $sql .= "OR gender = '$search_query' ";
+    }
 }
 
 $sql .= "ORDER BY student_id ASC ";
@@ -83,16 +114,22 @@ $sql .= "LIMIT $start_from, $records_per_page";
 $result = $conn->query($sql);
 
 // Count total number of records
-$total_records_query = "SELECT COUNT(*) FROM alumni";
+$total_records_query = "SELECT COUNT(*) FROM alumni WHERE 1=1 ";
 if (isset($_GET['query']) && !empty($_GET['query'])) {
-    $total_records_query .= " WHERE alumni_id LIKE '%$search_query%' 
-                              OR fname LIKE '%$search_query%' 
-                              OR mname LIKE '%$search_query%' 
-                              OR lname LIKE '%$search_query%' 
-                              OR address LIKE '%$search_query%'
-                              OR email LIKE '%$search_query%' 
-                              OR course LIKE '%$search_query%'
-                              OR (gender LIKE '%$search_query%' AND gender != 'fe')";
+    $total_records_query .= "AND (student_id LIKE '%$search_query%' 
+                                OR fname LIKE '%$search_query%' 
+                                OR mname LIKE '%$search_query%' 
+                                OR lname LIKE '%$search_query%'
+                                OR address LIKE '%$search_query%'
+                                OR email LIKE '%$search_query%' 
+                                OR course LIKE '%$search_query%'
+                                OR CONCAT(batch_startYear, ' - ', batch_endYear) LIKE '%$search_query%'
+                                OR date_created LIKE '%$search_query%'
+                                OR contact LIKE '%$search_query%') ";
+
+    if (strtolower($search_query) === 'male' || strtolower($search_query) === 'female') {
+        $total_records_query .= "OR gender = '$search_query' ";
+    }
 }
 $total_records_result = mysqli_query($conn, $total_records_query);
 $total_records_row = mysqli_fetch_array($total_records_result);
@@ -117,8 +154,9 @@ if (isset($_GET['ide'])) {
         });
     </script>
     ";
-    }
+}
 ?>
+
 
 
 <!DOCTYPE html>
@@ -319,104 +357,123 @@ if (isset($_GET['ide'])) {
             <div class="container-fluid" id="main-container">
                 <div class="container-fluid" id="content-container">
                     <div class="container-title">
-                        <span>Records</span>
+                        <span>
+                            <h2>Records</h2>
+                        </span>
                     </div>
-                    <div class="congainer-fluid" id="column-header">
+                    <div class="container-fluid">
                         <div class="row">
                             <div class="col">
-                                <div class="search">
-
-                                    <form class="d-flex" role="search">
-                                        <div class="container-fluid" id="search">
-                                            <input class="form-control me-2" type="search" name="query" placeholder="Search Records..." aria-label="Search" value="<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>">
-                                            <button class="btn btn-outline-success" type="submit" style="padding-left: 30px; padding-right: 39px;">Search</button>
+                                <div class="container-fluid" id="head-selector">
+                                    <div class="row">
+                                        <div class="col">
+                                            <select class="form-control" name="gender" id="gender-filter" required>
+                                                <option value="" selected hidden disabled>Select Sex</option>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                                <option value="">All</option>
+                                            </select>
+                                            <br>
                                         </div>
-                                    </form>
-
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col" style="text-align: end;">
-                                <div class="add-button">
-                                    <a style="text-decoration: none;" href='./add_alumni.php'>
-                                        <button id="add-new-btn" >Add New +</button>
-                                    </a>
-                                    <a class='btn btn-secondary border border-dark' href='./pendingAccount/pending.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Pending Account</a>
+                            <div class="congainer-fluid" id="column-header">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="search">
+
+                                            <form class="d-flex" role="search">
+                                                <div class="container-fluid" id="search" >
+                                                    <input class="form-control me-2" type="search" name="query" placeholder="Search Records..." aria-label="Search" value="<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>">
+                                                    <button class="btn btn-outline-success" type="submit" style="padding-left: 30px; padding-right: 39px;">Search</button>
+                                                </div>
+                                            </form>
+
+                                        </div>
+                                    </div>
+                                    <div class="col" style="text-align: end;">
+                                        <div class="add-button">
+                                            <a style="text-decoration: none;" href='./add_alumni.php'>
+                                                <button id="add-new-btn">Add New +</button>
+                                            </a>
+                                            <a class='btn btn-secondary border border-dark' href='./pendingAccount/pending.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Pending Account</a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="table-content">
-                        <table id="example" class="table-responsive table table-striped table-hover ">
-                            <thead>
+                            <div class="table-content">
+                                <table id="example" class="table-responsive table table-striped table-hover ">
+                                    <thead>
 
-                                <tr>
-                                    <th scope="col" class="inline">STUDENT ID</th>
-                                    <th scope="col" class="inline">NAME</th>
-                                    <th scope="col" class="inline">GENDER</th>
-                                    <th scope="col" class="inline">COURSE</th>
-                                    <th scope="col" class="inline">BATCH</th>
-                                    <th scope="col" class="inline">CONTACT</th>
-                                    <th scope="col" class="inline">ADDRESS</th>
-                                    <th scope="col" class="inline">EMAIL</th>
-                                    <th scope="col" class="inline">DATE CREATION</th>
-                                    <th scope="col" class="inline">ACTION</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                if ($result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        $fullname = $row["fname"] . " " . $row["mname"] . " " . $row["lname"];
-                                        $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
-                                ?>
                                         <tr>
-                                            <td class="inline"><?php echo $row['student_id'] ?></td>
-                                            <td class="inline"><?php echo htmlspecialchars($fullname) ?></td>
-                                            <td class="inline"><?php echo $row['gender'] ?></td>
-                                            <td class="inline"><?php echo $row['course'] ?></td>
-                                            <td class="inline"><?php echo htmlspecialchars($batch) ?></td>
-                                            <td class="inline"><?php echo $row['contact'] ?></td>
-                                            <td class="inline"><?php echo $row['address'] ?></td>
-                                            <td class="inline"><?php echo $row['email'] ?></td>
-                                            <td class="inline"><?php echo $row['date_created'] ?></td>
-                                            <?php
-                                            echo "
+                                            <th scope="col" class="inline">STUDENT ID</th>
+                                            <th scope="col" class="inline">NAME</th>
+                                            <th scope="col" class="inline">GENDER</th>
+                                            <th scope="col" class="inline">COURSE</th>
+                                            <th scope="col" class="inline">BATCH</th>
+                                            <th scope="col" class="inline">CONTACT</th>
+                                            <th scope="col" class="inline">ADDRESS</th>
+                                            <th scope="col" class="inline">EMAIL</th>
+                                            <th scope="col" class="inline">DATE CREATION</th>
+                                            <th scope="col" class="inline">ACTION</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        if ($result->num_rows > 0) {
+                                            while ($row = $result->fetch_assoc()) {
+                                                $fullname = $row["fname"] . " " . $row["mname"] . " " . $row["lname"];
+                                                $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
+                                        ?>
+                                                <tr>
+                                                    <td class="inline"><?php echo $row['student_id'] ?></td>
+                                                    <td class="inline"><?php echo htmlspecialchars($fullname) ?></td>
+                                                    <td class="inline"><?php echo $row['gender'] ?></td>
+                                                    <td class="inline"><?php echo $row['course'] ?></td>
+                                                    <td class="inline"><?php echo htmlspecialchars($batch) ?></td>
+                                                    <td class="inline"><?php echo $row['contact'] ?></td>
+                                                    <td class="inline"><?php echo $row['address'] ?></td>
+                                                    <td class="inline"><?php echo $row['email'] ?></td>
+                                                    <td class="inline"><?php echo $row['date_created'] ?></td>
+                                                    <?php
+                                                    echo "
                                                 <td class='inline act'>
                                                     <a class='btn btn-danger btn-sm archive' href='./del_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Archive</a>
                                                     <a class='btn btn-info btn-sm' href='./alumni_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>More Info</a>
                                                 </td>
                                             "; ?>
-                                        </tr>
-                                <?php
-                                    }
-                                } else {
-                                    $current_page = 0;
-                                    echo '<tr><td colspan="12" style="text-align: center;">No records found</td></tr>';
-                                }
-                                ?>
-                            </tbody>
-                        </table>
+                                                </tr>
+                                        <?php
+                                            }
+                                        } else {
+                                            $current_page = 0;
+                                            echo '<tr><td colspan="12" style="text-align: center;">No records found</td></tr>';
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
 
-                    </div>
+                            </div>
 
-                    <div>
-                        <!-- Pagination links -->
-                        <div class="pagination" id="content" style="float:right; margin-right:1.5%">
-                            <!-- next and previous -->
-                            <?php
-                            if ($current_page > 1) : ?>
-                                <a href="?page=<?= ($current_page - 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="prev" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">&laquo; Previous</a>
-                            <?php endif; ?>
+                            <div>
+                                <!-- Pagination links -->
+                                <div class="pagination" id="content" style="float:right; margin-right:1.5%">
+                                    <!-- next and previous -->
+                                    <?php
+                                    if ($current_page > 1) : ?>
+                                        <a href="?page=<?= ($current_page - 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="prev" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">&laquo; Previous</a>
+                                    <?php endif; ?>
 
-                            <?php if ($current_page < $total_pages) : ?>
-                                <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">Next &raquo;</a>
-                            <?php endif; ?>
+                                    <?php if ($current_page < $total_pages) : ?>
+                                        <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">Next &raquo;</a>
+                                    <?php endif; ?>
+                                </div>
+                                <p style="margin-left:2%;margin-top:2.3%;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
+                            </div>
                         </div>
-                        <p style="margin-left:2%;margin-top:2.3%;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
                     </div>
-                </div>
-            </div>
-            <!-- <div class="container-fluid" id="main-container">
+                    <!-- <div class="container-fluid" id="main-container">
                 <div class="container-fluid" id="content-container">
                     
                 </div>
@@ -476,7 +533,28 @@ if (isset($_GET['ide'])) {
                     });
                 });
             });
-            
+        </script>
+
+        <script>
+            document.getElementById('gender-filter').addEventListener('change', function() {
+                const selectedGender = this.value.toLowerCase();
+                const tableRows = document.querySelectorAll('table tbody tr');
+
+                tableRows.forEach(row => {
+                    const genderCell = row.querySelector('td:nth-child(3)'); // Gender is in the 3rd column
+
+                    if (genderCell) {
+                        const genderText = genderCell.textContent.toLowerCase().trim(); // Trim any whitespace
+
+                        // Use strict comparison for exact match
+                        if (selectedGender === "" || genderText === selectedGender) {
+                            row.style.display = ''; // Show the row
+                        } else {
+                            row.style.display = 'none'; // Hide the row
+                        }
+                    }
+                });
+            });
         </script>
 </body>
 

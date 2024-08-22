@@ -265,7 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                 </div>
 
                                 <div class="col">
-                                    <input class="form-control" type="text" id="name" name="fname" placeholder="First Name" required value="<?php echo $fname; ?>">
+                                    <input class="form-control" type="text" id="name" name="fname" disabled  placeholder="First Name" required value="<?php echo $fname; ?>">
                                 </div>
                             </div>
                         </div>
@@ -276,7 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                 </div>
 
                                 <div class="col">
-                                    <input class="form-control" type="text" id="name" name="mname" placeholder="Middle Name" value="<?php echo $mname; ?>">
+                                    <input class="form-control" type="text" id="name" name="mname" disabled  placeholder="Middle Name" value="<?php echo $mname; ?>">
                                 </div>
                             </div>
                         </div>
@@ -286,7 +286,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                     <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="last-name">Last Name:</label>
                                 </div>
                                 <div class="col">
-                                    <input class="form-control" type="text" id="name" name="lname" placeholder="Last Name" required value="<?php echo $lname; ?>">
+                                    <input class="form-control" type="text" id="name" name="lname" disabled  placeholder="Last Name" required value="<?php echo $lname; ?>">
                                 </div>
                             </div>
                         </div>
@@ -296,7 +296,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                     <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Contact:</label>
                                 </div>
                                 <div class="col">
-                                    <input class="form-control" type="number" id="name" name="contact" placeholder="Enter Phone No." required value="<?php echo $contact; ?>">
+                                    <input class="form-control" type="number" id="name" name="contact" disabled  placeholder="Enter Phone No." required value="<?php echo $contact; ?>">
                                 </div>
                             </div>
                         </div>
@@ -306,7 +306,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                     <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Email:</label>
                                 </div>
                                 <div class="col">
-                                    <input class="form-control" type="email" id="email" name="email" placeholder="Enter Email" required value="<?php echo $email; ?>">
+                                    <input class="form-control" type="email" id="email" name="email" placeholder="Enter Email"   disabled required value="<?php echo $email; ?> ">
                                 </div>
                             </div>
                         </div>
@@ -314,10 +314,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                             <div class="row" style="margin-top:20px;">
                                 <div class="col" id="buttons">
                                     <div class="button">
-                                        <button type="submit" class="btn btn-warning" name="inser" id="insert" value="insert">Update</button>
+                                        <!-- <button type="submit" class="btn btn-warning" name="inser" id="insert" value="insert">Update</button> -->
                                         <?php
                                         echo "
-                                                <a class='btn btn-danger' href='./coordinator.php'>Cancel</a>
+                                                <a class='btn btn-danger' href='./coordinator.php'>Go Back</a>
                                             "; ?>
                                     </div>
                                 </div>

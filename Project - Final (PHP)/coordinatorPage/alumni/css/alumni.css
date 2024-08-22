@@ -372,3 +372,10 @@ border-color: #fff;
     display: flex;
     justify-content: left;
 }
+
+#head-selector{
+    margin-top: 30px;
+    width: 100%;
+    justify-content: left;
+    display: flex;
+}
