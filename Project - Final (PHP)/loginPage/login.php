@@ -279,7 +279,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
     $emailCheck_decline = mysqli_query($conn, "SELECT * FROM declined_account WHERE email='$email'");
     $idCheck_pending = mysqli_query($conn, "SELECT * FROM pending WHERE student_id='$stud_id'");
     $idCheck_decline = mysqli_query($conn, "SELECT * FROM declined_account WHERE student_id='$stud_id'");
-
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
 
     if (mysqli_num_rows($emailCheck) > 0) {
@@ -413,8 +413,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>
         ";
-        if (strlen($stud_id) > 10 || !ctype_digit($stud_id)) {
-            echo "
+            if (strlen($stud_id) > 10 || !ctype_digit($stud_id)) {
+                echo "
             <script>
                 // Wait for the document to load
                 document.addEventListener('DOMContentLoaded', function() {
@@ -429,7 +429,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>
         ";
-        }
+            }
         } else if (mysqli_num_rows($idCheck_decline) > 0) {
             echo "
             <script>
@@ -536,20 +536,21 @@ function check_alumni($conn, $table, $log_email, $pass)
         <div class="form-container sign-up-container">
             <form action="#" method="POST">
                 <h1>Sign Up</h1>
-
+                <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
                 <div class="infield">
                     <input type="email" placeholder="Email" name="email" value="<?php echo htmlspecialchars($email); ?>" required />
                     <label></label>
                 </div>
-                <div class="infield">
-                    <input type="text" placeholder="Password" name="password" value="<?php echo htmlspecialchars($password); ?>" required />
-                    <!-- <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('password', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" /> -->
+                <div class="infield" style="position: relative;">
+                    <input type="password" placeholder="Password" id="password" name="password" onkeyup="validatePassword()" value="<?php echo htmlspecialchars($password); ?>" min="0" required />
+                    <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('password', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
                     <label></label>
 
                 </div>
-                <div class="infield">
-                    <input type="password" placeholder="Confirm Password" id="confirm_password" name="confirm_password" value="<?php echo htmlspecialchars($confirm_password); ?>" required />
-                    <!-- <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" /> -->
+                <div class="infield" style="position: relative;">
+                    <input type="password" placeholder="Confirm Password" id="confirm_password" onkeyup="validatePassword()" name="confirm_password" value="<?php echo htmlspecialchars($confirm_password); ?>" required />
+                    <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
+                    <label></label>
                 </div>
                 <div class="infield">
                     <input type="number" placeholder="Student ID" maxlength="10" required pattern="\d{1,10}" title="Student ID must be between 1 and 10 digits" name="student_id" value="<?php echo htmlspecialchars($stud_id); ?>" required />
@@ -694,23 +695,6 @@ function check_alumni($conn, $table, $log_email, $pass)
 
 
 
-    <script>
-        document.getElementById("registrationForm").addEventListener("submit", function(event) {
-            var password = document.getElementById("password").value;
-            var passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8}$/;
-
-            if (!passwordRegex.test(password)) {
-                Swal.fire({
-                    title: 'Invalid Password!',
-                    text: 'Password must be exactly 8 characters long, contain at least 1 uppercase letter, and 1 special character.',
-                    confirmButtonColor: '#4CAF50',
-                    confirmButtonText: 'OK'
-                });
-                event.preventDefault(); // Prevent form submission
-            }
-        });
-    </script>
-
 
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
@@ -801,6 +785,74 @@ function check_alumni($conn, $table, $log_email, $pass)
                 });
             return false; // Prevent default form submission
         }
+
+        function validatePassword() {
+            var password = document.getElementById("password").value;
+            var confirmPassword = document.getElementById("confirm_password").value;
+            var errorMessages = [];
+            var errorContainer = document.getElementById("real-time-errors");
+
+            // Clear previous error messages
+            errorContainer.innerHTML = "";
+
+            // Validation rules
+            if (password === '') {
+                errorContainer.style.display = 'none';
+                return true; // No password entered yet, don't block submission
+            } else {
+                if (password.length < 8) {
+                    errorMessages.push("Password must be at least 8 characters long.");
+                }
+                if (!/[A-Z]/.test(password)) {
+                    errorMessages.push("Password must contain at least one uppercase letter.");
+                }
+                if (!/[a-z]/.test(password)) {
+                    errorMessages.push("Password must contain at least one lowercase letter.");
+                }
+                if (!/\d/.test(password)) {
+                    errorMessages.push("Password must contain at least one digit.");
+                }
+                if (!/[^a-zA-Z\d]/.test(password)) {
+                    errorMessages.push("Password must contain at least one special character.");
+                }
+                if (confirmPassword && password !== confirmPassword) {
+                    errorMessages.push("Passwords do not match.");
+                }
+            }
+
+            // Display error messages
+            if (errorMessages.length > 0) {
+                errorMessages.forEach(function(error) {
+                    var p = document.createElement("p");
+                    p.innerText = error;
+                    p.className = "error-message";
+                    errorContainer.appendChild(p);
+                });
+
+                // Ensure the error container is visible
+                errorContainer.style.display = 'block';
+                return false; // Prevent form submission
+            } else {
+                // Hide the error container if there are no errors
+                errorContainer.style.display = 'none';
+                return true; // Allow form submission
+            }
+        }
+
+        document.querySelector('.form-container.sign-up-container form').addEventListener("submit", function(event) {
+            if (!validatePassword()) {
+                event.preventDefault(); // Prevent form submission if there are errors
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Please correct the errors before submitting.',
+                    confirmButtonColor: '#4CAF50',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+
+
+
 
         document.addEventListener('DOMContentLoaded', (event) => {
             const signUpButton = document.getElementById('signUp');
@@ -896,11 +948,9 @@ function check_alumni($conn, $table, $log_email, $pass)
                 toggleIcon.src = 'eye-close.png'; // Use the image for hiding password
             }
         }
-
-
     </script>
-<script>
-            document.getElementById('student_id').addEventListener('input', function() {
+    <script>
+        document.getElementById('student_id').addEventListener('input', function() {
             const maxLength = 10;
             const value = this.value;
 
@@ -924,8 +974,9 @@ function check_alumni($conn, $table, $log_email, $pass)
                     confirmButtonText: 'OK'
                 });
             }
-        });
-</script>
+
+        }); // Display error messages
+    </script>
 </body>
 
 </html>
