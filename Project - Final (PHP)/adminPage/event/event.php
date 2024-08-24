@@ -56,6 +56,11 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 // Pagination configuration
 $records_per_page = 6; // Number of records to display per page
 $current_page = isset($_GET['page']) ? $_GET['page'] : 1; // Get current page number, default to 1
+$sort_order = "ASC";
+if (isset($_GET['sort'])) {
+    $sort_order = $_GET['sort'] == "desc" ? "DESC" : "ASC";
+}
+
 
 // Calculate the limit clause for SQL query
 $start_from = ($current_page - 1) * $records_per_page;
@@ -73,7 +78,12 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
             OR description LIKE '%$search_query%'";
 }
 
-$sql .= "LIMIT $start_from, $records_per_page";
+$sort_column = "going"; // Default sorting column
+if (isset($_GET['column'])) {
+    $sort_column = $_GET['column'];
+}
+$sql .= "ORDER BY $sort_column $sort_order LIMIT $start_from, $records_per_page";
+
 
 $result = $conn->query($sql);
 
@@ -93,7 +103,7 @@ $total_pages = ceil($total_records / $records_per_page);
 
 
 if (isset($_GET['ide'])) {
-echo "
+    echo "
     <script>
     // Wait for the document to load
     document.addEventListener('DOMContentLoaded', function() {
@@ -351,7 +361,15 @@ echo "
                                     <th scope="col" class="inline">TITLE</th>
                                     <th scope="col" class="inline">SCHEDULE</th>
                                     <th scope="col" class="inline">DESCRIPTION</th>
-                                    <th scope="col" class="inline">GOING</th>
+                                    <th scope="col" class="inline"> 
+                                        <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>&column=going">
+                                            Going
+                                            <?php if (isset($_GET['column']) && $_GET['column'] == 'lname' && $sort_order == 'ASC'): ?>
+                                                <i class="bi bi-arrow-up"></i>
+                                            <?php elseif (isset($_GET['column']) && $_GET['column'] == 'lname' && $sort_order == 'DESC'): ?>
+                                                <i class="bi bi-arrow-down"></i>
+                                            <?php endif; ?>
+                                        </a></th>
                                     <th scope="col" class="inline">INTERESTED</th>
                                     <th scope="col" class="inline">NOT INTERESTED</th>
                                     <th scope="col" class="inline">DATE CREATED</th>
@@ -359,7 +377,7 @@ echo "
                                 </tr>
                             </thead>
 
-                            
+
                             <tbody>
                                 <?php
                                 if ($result->num_rows > 0) {

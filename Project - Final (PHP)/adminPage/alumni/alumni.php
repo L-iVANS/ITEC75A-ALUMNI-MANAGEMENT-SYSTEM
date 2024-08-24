@@ -53,7 +53,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     exit();
 }
 
-// Pagination configuration
 $records_per_page = 10;
 $current_page = isset($_GET['page']) ? $_GET['page'] : 1;
 $start_from = ($current_page - 1) * $records_per_page;
@@ -63,8 +62,15 @@ if (isset($_GET['sort'])) {
     $sort_order = $_GET['sort'] == "desc" ? "DESC" : "ASC";
 }
 
+$course_filter = isset($_GET['course']) ? $_GET['course'] : "";
+
 // Initialize the base SQL query
 $sql = "SELECT * FROM alumni WHERE 1=1 "; // Using 1=1 to allow easy appending of additional conditions
+
+// Apply course filter if selected
+if (!empty($course_filter)) {
+    $sql .= "AND course = '$course_filter' ";
+}
 
 // Check if search query is provided
 if (isset($_GET['query']) && !empty($_GET['query'])) {
@@ -85,23 +91,21 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
     }
 }
 
-// Check if date filter is provided
-if (isset($_GET['date_filter']) && !empty($_GET['date_filter'])) {
-    $date_filter = $_GET['date_filter'];
-    $sql .= "AND DATE(date_created) = '$date_filter' "; // Match exact date
+// Apply pagination only if no course is selected
+if (empty($course_filter)) {
+    $sql .= "ORDER BY lname $sort_order LIMIT $start_from, $records_per_page";
+} else {
+    $sql .= "ORDER BY lname $sort_order";
 }
-
-// Sorting and pagination
-$sort_column = "lname"; // Default sorting column
-if (isset($_GET['column'])) {
-    $sort_column = $_GET['column'];
-}
-$sql .= "ORDER BY $sort_column $sort_order LIMIT $start_from, $records_per_page";
 
 $result = $conn->query($sql);
 
 // Count total number of records
 $total_records_query = "SELECT COUNT(*) FROM alumni WHERE 1=1 ";
+if (!empty($course_filter)) {
+    $total_records_query .= "AND course = '$course_filter' ";
+}
+
 if (isset($_GET['query']) && !empty($_GET['query'])) {
     $total_records_query .= "AND (student_id LIKE '%$search_query%' 
                                 OR fname LIKE '%$search_query%' 
@@ -119,42 +123,17 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
     }
 }
 
-if (isset($_GET['date_filter']) && !empty($_GET['date_filter'])) {
-    $total_records_query .= "AND DATE(date_created) = '$date_filter' ";
-}
-
 $total_records_result = mysqli_query($conn, $total_records_query);
 $total_records_row = mysqli_fetch_array($total_records_result);
 $total_records = $total_records_row[0];
 
-$total_pages = ceil($total_records / $records_per_page);
-
-
-if (isset($_GET['date'])) {
-    $selected_date = $_GET['date'];
-    $query = "SELECT * FROM alumni WHERE DATE(date_creation) = '$selected_date'";
+if (empty($course_filter)) {
+    $total_pages = ceil($total_records / $records_per_page);
 } else {
-    // Default query without date filter
-    $query = "SELECT * FROM alumni";
+    $total_pages = 1; // Only one page when course is selected
 }
 
-if (isset($_GET['ide'])) {
-    echo "
-        <script>
-        // Wait for the document to load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Use SweetAlert2 for the alert
-            Swal.fire({
-                title: 'Account Archived Successfully',
-                timer: 2000,
-                showConfirmButton: true, // Show the confirm button
-                confirmButtonColor: '#4CAF50', // Set the button color to green
-                confirmButtonText: 'OK' // Change the button text if needed
-            });
-        });
-    </script>
-    ";
-}
+// Display records
 ?>
 
 
@@ -371,20 +350,22 @@ if (isset($_GET['ide'])) {
                     <div class="container-fluid" id="head-selector">
                         <div class="row">
                             <div class="col-6">
-                                <select class="form-control" name="course" id="course-filter" required>
-                                    <option value="" selected hidden disabled>Select a course</option>
-                                    <option value="BAJ">BAJ</option>
-                                    <option value="BECEd">BECEd</option>
-                                    <option value="BEEd">BEEd</option>
-                                    <option value="BSBM">BSBM</option>
-                                    <option value="BSOA">BSOA</option>
-                                    <option value="BSEntrep">BSEntrep</option>
-                                    <option value="BSHM">BSHM</option>
-                                    <option value="BSIT">BSIT</option>
-                                    <option value="BSCS">BSCS</option>
-                                    <option value="BSc(Psych)">BSc(Psych)</option>
-                                    <option value="">All Courses</option>
-                                </select>
+                                <form method="GET" action="">
+                                    <select class="form-control" name="course" id="course-filter" onchange="this.form.submit();">
+                                        <option value="" disabled selected>Select a course</option>
+                                        <option value="BAJ" <?php if ($course_filter == "BAJ") echo "selected"; ?>>BAJ</option>
+                                        <option value="BECEd" <?php if ($course_filter == "BECEd") echo "selected"; ?>>BECEd</option>
+                                        <option value="BEEd" <?php if ($course_filter == "BEEd") echo "selected"; ?>>BEEd</option>
+                                        <option value="BSBM" <?php if ($course_filter == "BSBM") echo "selected"; ?>>BSBM</option>
+                                        <option value="BSOA" <?php if ($course_filter == "BSOA") echo "selected"; ?>>BSOA</option>
+                                        <option value="BSEntrep" <?php if ($course_filter == "BSEntrep") echo "selected"; ?>>BSEntrep</option>
+                                        <option value="BSHM" <?php if ($course_filter == "BSHM") echo "selected"; ?>>BSHM</option>
+                                        <option value="BSIT" <?php if ($course_filter == "BSIT") echo "selected"; ?>>BSIT</option>
+                                        <option value="BSCS" <?php if ($course_filter == "BSCS") echo "selected"; ?>>BSCS</option>
+                                        <option value="BSc(Psych)" <?php if ($course_filter == "BSc(Psych)") echo "selected"; ?>>BSc(Psych)</option>
+                                        <option value="">All Courses</option>
+                                    </select>
+                                </form>
                                 <br>
                             </div>
                             <!-- <div class="col-6">
@@ -392,155 +373,135 @@ if (isset($_GET['ide'])) {
 
                         </div> -->
 
-                    </div>
-                    <div class="congainer-fluid" id="column-header">
-                        <div class="row">
-                            <div class="col">
-                                <div class="search">
-                                    <form class="d-flex" role="search">
-                                        <div class="container-fluid" id="search">
-                                            <input class="form-control me-2" type="search" name="query" placeholder="Search Records..." aria-label="Search" value="<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>">
-                                            <button class="btn btn-outline-success" type="submit" style="padding-left: 30px; padding-right: 39px;">Search</button>
-                                        </div>
-                                    </form>
+                        </div>
+                        <div class="congainer-fluid" id="column-header">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="search">
+                                        <form class="d-flex" role="search">
+                                            <div class="container-fluid" id="search">
+                                                <input class="form-control me-2" type="search" name="query" placeholder="Search Records..." aria-label="Search" value="<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>">
+                                                <button class="btn btn-outline-success" type="submit" style="padding-left: 30px; padding-right: 39px;">Search</button>
+                                            </div>
+                                        </form>
 
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col" style="text-align: end;">
-                                <div class="add-button">
-                                    <a style="text-decoration: none;" href='./add_alumni.php'>
-                                        <button id="add-new-btn">Add New +</button>
-                                    </a>
-                                    <a class='btn btn-secondary border border-dark' href='./pendingAccount/pending.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Pending Account</a>
-                                    <button id="print-table-btn" class="btn btn-primary">Print Table</button>
+                                <div class="col" style="text-align: end;">
+                                    <div class="add-button">
+                                        <a style="text-decoration: none;" href='./add_alumni.php'>
+                                            <button id="add-new-btn">Add New +</button>
+                                        </a>
+                                        <a class='btn btn-secondary border border-dark' href='./pendingAccount/pending.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Pending Account</a>
+                                        <button id="print-table-btn" class="btn btn-primary">Print Table</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="table-content">
-                        <table id="example" class="table-responsive table table-striped table-hover ">
-                            <thead>
-                                <tr>
-                                    <th scope="col" class="inline">STUDENT ID</th>
-                                    <th scope="col" class="inline">
-                                        <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>&column=lname">
-                                            Last Name
-                                            <?php if (isset($_GET['column']) && $_GET['column'] == 'lname' && $sort_order == 'ASC'): ?>
-                                                <i class="bi bi-arrow-up"></i>
-                                            <?php elseif (isset($_GET['column']) && $_GET['column'] == 'lname' && $sort_order == 'DESC'): ?>
-                                                <i class="bi bi-arrow-down"></i>
-                                            <?php endif; ?>
-                                        </a>
-                                    </th>
-                                    <th scope="col" class="inline">
-                                        <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>&column=fname">
-                                            First Name
-                                            <?php if (isset($_GET['column']) && $_GET['column'] == 'fname' && $sort_order == 'ASC'): ?>
-                                                <i class="bi bi-arrow-up"></i>
-                                            <?php elseif (isset($_GET['column']) && $_GET['column'] == 'fname' && $sort_order == 'DESC'): ?>
-                                                <i class="bi bi-arrow-down"></i>
-                                            <?php endif; ?>
-                                        </a>
-                                    </th>
-                                    <th scope="col" class="inline">
-                                        <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>&column=mname">
-                                            Middle Name
-                                            <?php if (isset($_GET['column']) && $_GET['column'] == 'mname' && $sort_order == 'ASC'): ?>
-                                                <i class="bi bi-arrow-up"></i>
-                                            <?php elseif (isset($_GET['column']) && $_GET['column'] == 'mname' && $sort_order == 'DESC'): ?>
-                                                <i class="bi bi-arrow-down"></i>
-                                            <?php endif; ?>
-                                        </a>
-                                    </th>
-                                    <th scope="col" class="inline">GENDER</th>
-                                    <th scope="col" class="inline">COURSE</th>
-                                    <th scope="col" class="inline">BATCH</th>
-                                    <th scope="col" class="inline">CONTACT</th>
-                                    <th scope="col" class="inline">ADDRESS</th>
-                                    <th scope="col" class="inline">EMAIL</th>
-                                    <th scope="col" class="inline">DATE CREATION</th>
-                                    <th scope="col" class="inline">ACTION</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                if ($result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        $fullname = $row["fname"] . " " . $row["mname"] . " " . $row["lname"];
-                                        $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
-                                ?>
-                                        <tr>
-                                            <td class="inline"><?php echo $row['student_id'] ?></td>
-                                            <td class="inline"><?php echo $row['lname'] ?></td>
-                                            <td class="inline"><?php echo $row['fname'] ?></td>
-                                            <td class="inline"><?php echo $row['mname'] ?></td>
-                                            <td class="inline"><?php echo $row['gender'] ?></td>
-                                            <td class="inline"><?php echo $row['course'] ?></td>
-                                            <td class="inline"><?php echo htmlspecialchars($batch) ?></td>
-                                            <td class="inline"><?php echo $row['contact'] ?></td>
-                                            <td class="inline"><?php echo $row['address'] ?></td>
-                                            <td class="inline"><?php echo $row['email'] ?></td>
-                                            <td class="inline"><?php echo $row['date_created'] ?></td>
-                                            <?php
-                                            echo "
+                        <div class="table-content">
+                            <table id="example" class="table-responsive table table-striped table-hover ">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="inline">STUDENT ID</th>
+                                        <th scope="col" class="inline">
+                                            <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>&column=lname">
+                                                Last Name
+                                                <?php if (isset($_GET['column']) && $_GET['column'] == 'lname' && $sort_order == 'ASC'): ?>
+                                                    <i class="bi bi-arrow-up"></i>
+                                                <?php elseif (isset($_GET['column']) && $_GET['column'] == 'lname' && $sort_order == 'DESC'): ?>
+                                                    <i class="bi bi-arrow-down"></i>
+                                                <?php endif; ?>
+                                            </a>
+                                        </th>
+                                        <th scope="col" class="inline">
+                                            <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>&column=fname">
+                                                First Name
+                                                <?php if (isset($_GET['column']) && $_GET['column'] == 'fname' && $sort_order == 'ASC'): ?>
+                                                    <i class="bi bi-arrow-up"></i>
+                                                <?php elseif (isset($_GET['column']) && $_GET['column'] == 'fname' && $sort_order == 'DESC'): ?>
+                                                    <i class="bi bi-arrow-down"></i>
+                                                <?php endif; ?>
+                                            </a>
+                                        </th>
+                                        <th scope="col" class="inline">
+                                            <a href="?page=<?php echo $current_page; ?>&sort=<?php echo $sort_order == 'ASC' ? 'desc' : 'asc'; ?>&query=<?php echo isset($_GET['query']) ? urlencode($_GET['query']) : ''; ?>&column=mname">
+                                                Middle Name
+                                                <?php if (isset($_GET['column']) && $_GET['column'] == 'mname' && $sort_order == 'ASC'): ?>
+                                                    <i class="bi bi-arrow-up"></i>
+                                                <?php elseif (isset($_GET['column']) && $_GET['column'] == 'mname' && $sort_order == 'DESC'): ?>
+                                                    <i class="bi bi-arrow-down"></i>
+                                                <?php endif; ?>
+                                            </a>
+                                        </th>
+                                        <th scope="col" class="inline">SEX</th>
+                                        <th scope="col" class="inline">COURSE</th>
+                                        <th scope="col" class="inline">BATCH</th>
+                                        <th scope="col" class="inline">CONTACT</th>
+                                        <th scope="col" class="inline">ADDRESS</th>
+                                        <th scope="col" class="inline">EMAIL</th>
+                                        <th scope="col" class="inline">DATE CREATION</th>
+                                        <th scope="col" class="inline">ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    if ($result->num_rows > 0) {
+                                        while ($row = $result->fetch_assoc()) {
+                                            $fullname = $row["fname"] . " " . $row["mname"] . " " . $row["lname"];
+                                            $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
+                                    ?>
+                                            <tr>
+                                                <td class="inline"><?php echo $row['student_id'] ?></td>
+                                                <td class="inline"><?php echo $row['lname'] ?></td>
+                                                <td class="inline"><?php echo $row['fname'] ?></td>
+                                                <td class="inline"><?php echo $row['mname'] ?></td>
+                                                <td class="inline"><?php echo $row['gender'] ?></td>
+                                                <td class="inline"><?php echo $row['course'] ?></td>
+                                                <td class="inline"><?php echo htmlspecialchars($batch) ?></td>
+                                                <td class="inline"><?php echo $row['contact'] ?></td>
+                                                <td class="inline"><?php echo $row['address'] ?></td>
+                                                <td class="inline"><?php echo $row['email'] ?></td>
+                                                <td class="inline"><?php echo $row['date_created'] ?></td>
+                                                <?php
+                                                echo "
                                                 <td class='inline act'>
                                                     <a class='btn btn-danger btn-sm archive' href='./del_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Archive</a>
                                                     <a class='btn btn-outline-primary' href='./alumni_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Details</a>
                                                 </td>
                                             "; ?>
-                                        </tr>
-                                <?php
+                                            </tr>
+                                    <?php
+                                        }
+                                    } else {
+                                        $current_page = 0;
+                                        echo '<tr><td colspan="12" style="text-align: center;">No records found</td></tr>';
                                     }
-                                } else {
-                                    $current_page = 0;
-                                    echo '<tr><td colspan="12" style="text-align: center;">No records found</td></tr>';
-                                }
-                                ?>
+                                    ?>
 
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
 
-                    </div>
-
-                    <div>
-                        <!-- Pagination links -->
-                        <div class="pagination" id="content" style="float:right; margin-right:1.5%">
-                            <!-- next and previous -->
-                            <?php
-                            if ($current_page > 1) : ?>
-                                <a href="?page=<?= ($current_page - 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="prev" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">&laquo; Previous</a>
-                            <?php endif; ?>
-
-                            <?php if ($current_page < $total_pages) : ?>
-                                <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#f7b205;color:white;margin-bottom:13px;">Next &raquo;</a>
-                            <?php endif; ?>
                         </div>
-                        <p style="margin-left:2%;margin-top:2.3%;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
+
+                        <div>
+                            <!-- Pagination links -->
+                            <div class="pagination" id="content" style="float:right; margin-right:1.5%">
+                                <!-- next and previous -->
+                                <?php
+                                if ($current_page > 1) : ?>
+                                    <a href="?page=<?= ($current_page - 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="prev" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">&laquo; Previous</a>
+                                <?php endif; ?>
+
+                                <?php if ($current_page < $total_pages) : ?>
+                                    <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#f7b205;color:white;margin-bottom:13px;">Next &raquo;</a>
+                                <?php endif; ?>
+                            </div>
+                            <p style="margin-left:2%;margin-top:2.3%;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <!-- <div class="container-fluid" id="main-container">
-                <div class="container-fluid" id="content-container">
-                    
-                </div>
-            </div> -->
         </main>
-        <!-- <div class="container">
-            <select class="form-control" name="course" id="course-filter" required>
-                <option value="" selected hidden disabled>Select a course</option>
-                <option value="BAJ">BAJ</option>
-                <option value="BECEd">BECEd</option>
-                <option value="BEEd">BEEd</option>
-                <option value="BSBM">BSBM</option>
-                <option value="BSOA">BSOA</option>
-                <option value="BSEntrep">BSEntrep</option>
-                <option value="BSHM">BSHM</option>
-                <option value="BSIT">BSIT</option>
-                <option value="BSCS">BSCS</option>
-                <option value="BSc(Psych)">BSc(Psych)</option>
-                <option value="">All Courses</option>
 
-            </select> -->
 
         <script>
             document.addEventListener('DOMContentLoaded', (event) => {
@@ -599,30 +560,6 @@ if (isset($_GET['ide'])) {
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // document.getElementById('print-table-btn').addEventListener('click', function() {
-                //     var tableContent = document.querySelector('.table-content').innerHTML;
-
-                //     if (!tableContent) {
-                //         console.error('No content found for printing');
-                //         return; // Exit if no content found
-                //     }
-
-                //     var printWindow = window.open('', '_blank', 'height=600,width=800');
-
-                //     if (!printWindow) {
-                //         console.error('Popup blocked');
-                //         return; // Exit if the popup was blocked
-                //     }
-
-                //     printWindow.document.open();
-                //     printWindow.document.write('<html><head><title>Print Table</title>');
-                //     printWindow.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">');
-                //     printWindow.document.write('</head><body>');
-                //     printWindow.document.write('<table class="table table-striped table-bordered">');
-                //     printWindow.document.write(tableContent);
-                //     printWindow.document.write('</table>');
-                //     printWindow.document.write('</body></html>');
-                //     printWindow.document.close();
 
                 setTimeout(() => {
                     printWindow.print();
@@ -641,15 +578,15 @@ if (isset($_GET['ide'])) {
                     filename: 'alumni_table.pdf',
                     image: {
                         type: 'jpeg',
-                        quality: 0.98
+                        quality: 1
                     },
                     html2canvas: {
                         scale: 2
                     },
                     jsPDF: {
-                        unit: 'in',
-                        format: 'legal',
-                        orientation: 'landscape'
+                        unit: 'cm',
+                        format: 'a2',
+                        orientation: 'p'
                     }
                 };
 
@@ -664,7 +601,7 @@ if (isset($_GET['ide'])) {
                 const tableRows = document.querySelectorAll('table tbody tr');
 
                 tableRows.forEach(row => {
-                    const courseCell = row.querySelector('td:nth-child(4)'); // Assuming the course is in the 4th column
+                    const courseCell = row.querySelector('td:nth-child(6)'); // Assuming the course is in the 4th column
 
                     if (courseCell) {
                         const courseText = courseCell.textContent.toLowerCase();
