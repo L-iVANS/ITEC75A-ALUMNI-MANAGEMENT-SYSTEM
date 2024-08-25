@@ -553,11 +553,11 @@ function check_alumni($conn, $table, $log_email, $pass)
                     <label></label>
                 </div>
                 <div class="infield">
-                    <input type="number" placeholder="Student ID" maxlength="10" required pattern="\d{1,10}" title="Student ID must be between 1 and 10 digits" name="student_id" value="<?php echo htmlspecialchars($stud_id); ?>" required />
+                    <input type="text" id="student_id" placeholder="Student ID" maxlength="9" required pattern="\d{9}" title="Student ID must be exactly 9 digits" name="student_id" value="<?php echo htmlspecialchars($stud_id); ?>" />
                     <label></label>
                 </div>
                 <div class="infield">
-                    <input type="text" placeholder="First Name" name="fname" value="<?php echo htmlspecialchars($fname); ?>" required />
+                    <input type="number" placeholder="First Name" name="fname" value="<?php echo htmlspecialchars($fname); ?>" required />
                     <label></label>
                 </div>
                 <div class="infield">
@@ -697,285 +697,93 @@ function check_alumni($conn, $table, $log_email, $pass)
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            const signUpButton = document.getElementById('signUp');
-            const logInButton = document.getElementById('logIn');
-            const container = document.getElementById('container');
-
-            // Function to read URL parameters
-            function getQueryParams() {
-                const params = {};
-                window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(str, key, value) {
-                    params[key] = value;
-                });
-                return params;
-            }
-
-            // Check URL parameters and activate the appropriate tab
-            const params = getQueryParams();
-            if (params.tab === 'signup') {
-                container.classList.add('right-panel-active');
-            } else if (params.tab === 'login') {
-                container.classList.remove('right-panel-active');
-            }
-
-            signUpButton.addEventListener('click', () => {
-                container.classList.add('right-panel-active');
-            });
-
-            logInButton.addEventListener('click', () => {
-                container.classList.remove('right-panel-active');
-            });
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const startYearSelect = document.getElementById('startYear');
-            const endYearSelect = document.getElementById('endYear');
-
-            // Disable endYear select by default if no start year is selected
-            if (!startYearSelect.value) {
-                endYearSelect.disabled = true;
+        function togglePasswordVisibility(inputId, toggleId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleButton = document.getElementById(toggleId);
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleButton.src = 'eye-open.png'; // assuming you have this icon for visibility
             } else {
-                populateEndYearOptions(parseInt(startYearSelect.value));
+                passwordInput.type = 'password';
+                toggleButton.src = 'eye-close.png';
             }
-
-            startYearSelect.addEventListener('change', function() {
-                const selectedStartYear = parseInt(this.value);
-                endYearSelect.disabled = false;
-
-                populateEndYearOptions(selectedStartYear);
-            });
-
-            function populateEndYearOptions(selectedStartYear) {
-                const currentYear = new Date().getFullYear();
-                const yearRange = 21; // Adjust this number as needed
-                const selectedEndYear = endYearSelect.getAttribute('data-selected'); // Get the selected end year
-
-                // Clear current endYear options
-                endYearSelect.innerHTML = '<option value="" selected hidden disabled>Batch: To Year</option>';
-
-                // Generate new options for endYear
-                for (let year = selectedStartYear + 1; year <= currentYear + yearRange; year++) {
-                    const option = document.createElement('option');
-                    option.value = year;
-                    option.textContent = year;
-                    if (year == selectedEndYear) {
-                        option.selected = true; // Preserve the selected end year
-                    }
-                    endYearSelect.appendChild(option);
-                }
-            }
-        });
-
-
-        function submitForm(form) {
-            Swal.fire({
-                    title: 'Do you want to continue?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#e03444',
-                    cancelButtonColor: '#ffc404',
-                    confirmButtonText: 'Submit'
-                })
-                .then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit(); // Submit the form
-                    }
-                });
-            return false; // Prevent default form submission
         }
 
         function validatePassword() {
-            var password = document.getElementById("password").value;
-            var confirmPassword = document.getElementById("confirm_password").value;
-            var errorMessages = [];
-            var errorContainer = document.getElementById("real-time-errors");
-
-            // Clear previous error messages
-            errorContainer.innerHTML = "";
-
-            // Validation rules
-            if (password === '') {
-                errorContainer.style.display = 'none';
-                return true; // No password entered yet, don't block submission
-            } else {
-                if (password.length < 8) {
-                    errorMessages.push("Password must be at least 8 characters long.");
-                }
-                if (!/[A-Z]/.test(password)) {
-                    errorMessages.push("Password must contain at least one uppercase letter.");
-                }
-                if (!/[a-z]/.test(password)) {
-                    errorMessages.push("Password must contain at least one lowercase letter.");
-                }
-                if (!/\d/.test(password)) {
-                    errorMessages.push("Password must contain at least one digit.");
-                }
-                if (!/[^a-zA-Z\d]/.test(password)) {
-                    errorMessages.push("Password must contain at least one special character.");
-                }
-                if (confirmPassword && password !== confirmPassword) {
-                    errorMessages.push("Passwords do not match.");
-                }
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const errors = [];
+            if (password.length < 8) {
+                errors.push('Password must be at least 8 characters long.');
             }
-
-            // Display error messages
-            if (errorMessages.length > 0) {
-                errorMessages.forEach(function(error) {
-                    var p = document.createElement("p");
-                    p.innerText = error;
-                    p.className = "error-message";
-                    errorContainer.appendChild(p);
-                });
-
-                // Ensure the error container is visible
-                errorContainer.style.display = 'block';
-                return false; // Prevent form submission
-            } else {
-                // Hide the error container if there are no errors
-                errorContainer.style.display = 'none';
-                return true; // Allow form submission
+            if (!/[A-Z]/.test(password)) {
+                errors.push('Password must contain at least one uppercase letter.');
             }
+            if (!/[a-z]/.test(password)) {
+                errors.push('Password must contain at least one lowercase letter.');
+            }
+            if (!/\d/.test(password)) {
+                errors.push('Password must contain at least one digit.');
+            }
+            if (!/[!@#$%^&*]/.test(password)) {
+                errors.push('Password must contain at least one special character.');
+            }
+            if (password !== confirmPassword) {
+                errors.push('Passwords do not match.');
+            }
+            if (errors.length > 0) {
+                document.getElementById('real-time-errors').innerHTML = errors.join('<br>');
+                return false;
+            }
+            document.getElementById('real-time-errors').innerHTML = '';
+            return true;
         }
 
-        document.querySelector('.form-container.sign-up-container form').addEventListener("submit", function(event) {
-            if (!validatePassword()) {
-                event.preventDefault(); // Prevent form submission if there are errors
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Please correct the errors before submitting.',
-                    confirmButtonColor: '#4CAF50',
-                    confirmButtonText: 'OK'
-                });
-            }
-        });
-
-
-
-
-        document.addEventListener('DOMContentLoaded', (event) => {
-            const signUpButton = document.getElementById('signUp');
-            const logInButton = document.getElementById('logIn');
-            const container = document.getElementById('container');
-
-            // Function to read URL parameters
-            function getQueryParams() {
-                const params = {};
-                window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(str, key, value) {
-                    params[key] = value;
-                });
-                return params;
+        function validateForm(form) {
+            const studentId = document.getElementById('student_id').value;
+            if (studentId.length !== 9 || !/^\d{9}$/.test(studentId)) {
+                alert('Student ID must be exactly 9 digits.');
+                return false;
             }
 
-            // Check URL parameters and activate the appropriate tab
-            const params = getQueryParams();
-            if (params.tab === 'signup') {
-                container.classList.add('right-panel-active');
-            } else if (params.tab === 'login') {
-                container.classList.remove('right-panel-active');
-            }
+            return validatePassword();
+        }
 
-            signUpButton.addEventListener('click', () => {
-                container.classList.add('right-panel-active');
-            });
-
-            logInButton.addEventListener('click', () => {
-                container.classList.remove('right-panel-active');
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const startYearSelect = document.getElementById('startYear');
+        // Handle dynamic end year population
+        document.getElementById('startYear').addEventListener('change', function () {
+            const startYear = parseInt(this.value);
             const endYearSelect = document.getElementById('endYear');
-
-            // Disable endYear select by default if no start year is selected
-            if (!startYearSelect.value) {
-                endYearSelect.disabled = true;
-            } else {
-                populateEndYearOptions(parseInt(startYearSelect.value));
-            }
-
-            startYearSelect.addEventListener('change', function() {
-                const selectedStartYear = parseInt(this.value);
-                endYearSelect.disabled = false;
-
-                populateEndYearOptions(selectedStartYear);
-            });
-
-            function populateEndYearOptions(selectedStartYear) {
-                const currentYear = new Date().getFullYear();
-                const yearRange = 21; // Adjust this number as needed
-                const selectedEndYear = endYearSelect.getAttribute('data-selected'); // Get the selected end year
-
-                // Clear current endYear options
-                endYearSelect.innerHTML = '<option value="" selected hidden disabled>Batch: To Year</option>';
-
-                // Generate new options for endYear
-                for (let year = selectedStartYear + 1; year <= currentYear + yearRange; year++) {
-                    const option = document.createElement('option');
-                    option.value = year;
-                    option.textContent = year;
-                    if (year == selectedEndYear) {
-                        option.selected = true; // Preserve the selected end year
-                    }
-                    endYearSelect.appendChild(option);
+            endYearSelect.innerHTML = '<option value="" selected hidden disabled>Batch: To Year</option>';
+            for (let year = startYear + 1; year <= new Date().getFullYear() + 21; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === parseInt(endYearSelect.getAttribute('data-selected'))) {
+                    option.selected = true;
                 }
+                endYearSelect.appendChild(option);
             }
         });
 
-        // FOR NO NIGGATIVE NUMBERS
-        document.addEventListener("DOMContentLoaded", function() {
-            const studentIdInput = document.getElementById("student_id");
-
-            studentIdInput.addEventListener("input", function(event) {
-                let value = studentIdInput.value;
-                // Replace all non-numeric characters
-                value = value.replace(/[^0-9]/g, '');
-                studentIdInput.value = value;
-            });
-        });
-
-        function togglePasswordVisibility(passwordId, toggleId) {
-            var passwordField = document.getElementById(passwordId);
-            var toggleIcon = document.getElementById(toggleId);
-
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                toggleIcon.src = 'eye-open.png'; // Use the image for showing password
-            } else {
-                passwordField.type = 'password';
-                toggleIcon.src = 'eye-close.png'; // Use the image for hiding password
-            }
+        // Initialize dynamic end year selection based on the current state
+        if (document.getElementById('startYear').value) {
+            const event = new Event('change');
+            document.getElementById('startYear').dispatchEvent(event);
         }
     </script>
+    <!-- JS for form transitions -->
     <script>
-        document.getElementById('student_id').addEventListener('input', function() {
-            const maxLength = 10;
-            const value = this.value;
+        const signUpButton = document.getElementById('signUp');
+        const signInButton = document.getElementById('signIn');
+        const container = document.getElementById('container');
 
-            // Check if the value exceeds the max length
-            if (value.length > maxLength) {
-                this.value = value.slice(0, maxLength); // Trim the value to the max length
-            }
+        signUpButton.addEventListener('click', () => {
+            container.classList.add("right-panel-active");
         });
 
-        document.querySelector('form').addEventListener('submit', function(event) {
-            const studentId = document.getElementById('student_id').value;
-
-            // Prevent form submission if the Student ID exceeds 10 digits
-            if (studentId.length > 10) {
-                event.preventDefault(); // Stop the form from submitting
-                Swal.fire({
-                    title: 'Student ID must be 10 digits or less',
-                    timer: 2000,
-                    showConfirmButton: true,
-                    confirmButtonColor: '#4CAF50',
-                    confirmButtonText: 'OK'
-                });
-            }
-
-        }); // Display error messages
+        signInButton.addEventListener('click', () => {
+            container.classList.remove("right-panel-active");
+        });
     </script>
 </body>
 
