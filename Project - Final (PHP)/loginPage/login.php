@@ -553,11 +553,11 @@ function check_alumni($conn, $table, $log_email, $pass)
                     <label></label>
                 </div>
                 <div class="infield">
-                    <input type="text" id="student_id" placeholder="Student ID" maxlength="9" required pattern="\d{9}" title="Student ID must be exactly 9 digits" name="student_id" value="<?php echo htmlspecialchars($stud_id); ?>" />
+                    <input type="text" id="student_id" placeholder="Student ID" maxlength="9" required pattern="\d{9}" title="Student ID must be exactly 9 digits" name="student_id" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                     <label></label>
                 </div>
                 <div class="infield">
-                    <input type="number" placeholder="First Name" name="fname" value="<?php echo htmlspecialchars($fname); ?>" required />
+                    <input type="text" placeholder="First Name" name="fname" value="<?php echo htmlspecialchars($fname); ?>" required />
                     <label></label>
                 </div>
                 <div class="infield">
@@ -749,8 +749,23 @@ function check_alumni($conn, $table, $log_email, $pass)
             return validatePassword();
         }
 
+        function validateForm(form) {
+            const studentId = document.getElementById('student_id').value;
+            if (!/^\d{9}$/.test(studentId)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Input',
+                    text: 'Student ID must be exactly 9 digits and contain only numbers.'
+                });
+                return false;
+            }
+
+            return validatePassword();
+        }
+
+
         // Handle dynamic end year population
-        document.getElementById('startYear').addEventListener('change', function () {
+        document.getElementById('startYear').addEventListener('change', function() {
             const startYear = parseInt(this.value);
             const endYearSelect = document.getElementById('endYear');
             endYearSelect.innerHTML = '<option value="" selected hidden disabled>Batch: To Year</option>';
