@@ -534,111 +534,110 @@ function check_alumni($conn, $table, $log_email, $pass)
 
     <div class="container" id="container">
         <div class="form-container sign-up-container">
-            <form action="#" method="POST">
+            <form action="#" method="POST"  onsubmit="return validateForm()">
                 <h1>Sign Up</h1>
-                <form id="signup-form" onsubmit="return validateForm()">
-                <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
-                <div class="infield">
-                    <input type="email" placeholder="Email" name="email" value="<?php echo htmlspecialchars($email); ?>" required />
-                    <label></label>
-                </div>
-                <div class="infield" style="position: relative;">
-                    <input type="password" placeholder="Password" id="password" name="password" onkeyup="validatePassword()" value="<?php echo htmlspecialchars($password); ?>" min="0" required />
-                    <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('password', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
-                    <label></label>
+                    <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
+                    <div class="infield">
+                        <input type="email" placeholder="Email" name="email" value="<?php echo htmlspecialchars($email); ?>" required />
+                        <label></label>
+                    </div>
+                    <div class="infield" style="position: relative;">
+                        <input type="password" placeholder="Password" id="password" name="password" onkeyup="validatePassword()" value="<?php echo htmlspecialchars($password); ?>" min="0" required />
+                        <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('password', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
+                        <label></label>
 
-                </div>
-                <div class="infield" style="position: relative;">
-                    <input type="password" placeholder="Confirm Password" id="confirm_password" onkeyup="validatePassword()" name="confirm_password" value="<?php echo htmlspecialchars($confirm_password); ?>" required />
-                    <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
-                    <label></label>
-                </div>
-                <div class="infield">
-                    <input type="text" id="student_id" placeholder="Student ID" maxlength="9" required pattern="\d{9}" title="Student ID must be exactly 9 digits" name="student_id" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
-                    <label></label>
-                </div>
-                <div class="infield">
-                    <input type="text" placeholder="First Name" name="fname" value="<?php echo htmlspecialchars($fname); ?>" required />
-                    <label></label>
-                </div>
-                <div class="infield">
-                    <input type="text" placeholder="Middle Name" name="mname" value="<?php echo htmlspecialchars($mname); ?>" />
-                    <label></label>
-                </div>
-                <div class="infield">
-                    <input type="text" placeholder="Last Name" name="lname" value="<?php echo htmlspecialchars($lname); ?>" required />
-                    <label></label>
-                </div>
-                <div class="infield">
-                    <select name="gender" id="gender" required>
-                        <option value="" selected hidden disabled>Select a Gender</option>
-                        <option value="Male" <?php echo ($gender == 'Male') ? 'selected' : ''; ?>>Male</option>
-                        <option value="Female" <?php echo ($gender == 'Female') ? 'selected' : ''; ?>>Female</option>
-                    </select>
-                </div>
-                <div class="infield">
-                    <select class="form-control" name="course" id="course" required>
-                        <option value="" selected hidden disabled>Select a course</option>
-                        <option value="BAJ" <?php echo ($course == 'BAJ') ? 'selected' : ''; ?>>BAJ</option>
-                        <option value="BECEd" <?php echo ($course == 'BECEd') ? 'selected' : ''; ?>>BECEd</option>
-                        <option value="BEEd" <?php echo ($course == 'BEEd') ? 'selected' : ''; ?>>BEEd</option>
-                        <option value="BSBM" <?php echo ($course == 'BSBM') ? 'selected' : ''; ?>>BSBM</option>
-                        <option value="BSOA" <?php echo ($course == 'BSOA') ? 'selected' : ''; ?>>BSOA</option>
-                        <option value="BSEntrep" <?php echo ($course == 'BSEntrep') ? 'selected' : ''; ?>>BSEntrep</option>
-                        <option value="BSHM" <?php echo ($course == 'BSHM') ? 'selected' : ''; ?>>BSHM</option>
-                        <option value="BSIT" <?php echo ($course == 'BSIT') ? 'selected' : ''; ?>>BSIT</option>
-                        <option value="BSCS" <?php echo ($course == 'BSCS') ? 'selected' : ''; ?>>BSCS</option>
-                        <option value="BSc(Psych)" <?php echo ($course == 'BSc(Psych)') ? 'selected' : ''; ?>>BSc(Psych)</option>
-                    </select>
-                </div>
-                <div class="infield">
-                    <select class="form-control" name="startYear" id="startYear" required>
-                        <option value="" selected hidden disabled>Batch: From Year</option>
-                        <?php
-                        // Get the current year
-                        $currentYear = date('Y');
+                    </div>
+                    <div class="infield" style="position: relative;">
+                        <input type="password" placeholder="Confirm Password" id="confirm_password" onkeyup="validatePassword()" name="confirm_password" value="<?php echo htmlspecialchars($confirm_password); ?>" required />
+                        <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
+                        <label></label>
+                    </div>
+                    <div class="infield">
+                        <input type="text" id="student_id" placeholder="Student ID" maxlength="9" required pattern="\d{9}" title="Student ID must be exactly 9 digits" name="student_id" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                        <label></label>
+                    </div>
+                    <div class="infield">
+                        <input type="text" placeholder="First Name" name="fname" value="<?php echo htmlspecialchars($fname); ?>" required />
+                        <label></label>
+                    </div>
+                    <div class="infield">
+                        <input type="text" placeholder="Middle Name" name="mname" value="<?php echo htmlspecialchars($mname); ?>" />
+                        <label></label>
+                    </div>
+                    <div class="infield">
+                        <input type="text" placeholder="Last Name" name="lname" value="<?php echo htmlspecialchars($lname); ?>" required />
+                        <label></label>
+                    </div>
+                    <div class="infield">
+                        <select name="gender" id="gender" required>
+                            <option value="" selected hidden disabled>Select a Gender</option>
+                            <option value="Male" <?php echo ($gender == 'Male') ? 'selected' : ''; ?>>Male</option>
+                            <option value="Female" <?php echo ($gender == 'Female') ? 'selected' : ''; ?>>Female</option>
+                        </select>
+                    </div>
+                    <div class="infield">
+                        <select class="form-control" name="course" id="course" required>
+                            <option value="" selected hidden disabled>Select a course</option>
+                            <option value="BAJ" <?php echo ($course == 'BAJ') ? 'selected' : ''; ?>>BAJ</option>
+                            <option value="BECEd" <?php echo ($course == 'BECEd') ? 'selected' : ''; ?>>BECEd</option>
+                            <option value="BEEd" <?php echo ($course == 'BEEd') ? 'selected' : ''; ?>>BEEd</option>
+                            <option value="BSBM" <?php echo ($course == 'BSBM') ? 'selected' : ''; ?>>BSBM</option>
+                            <option value="BSOA" <?php echo ($course == 'BSOA') ? 'selected' : ''; ?>>BSOA</option>
+                            <option value="BSEntrep" <?php echo ($course == 'BSEntrep') ? 'selected' : ''; ?>>BSEntrep</option>
+                            <option value="BSHM" <?php echo ($course == 'BSHM') ? 'selected' : ''; ?>>BSHM</option>
+                            <option value="BSIT" <?php echo ($course == 'BSIT') ? 'selected' : ''; ?>>BSIT</option>
+                            <option value="BSCS" <?php echo ($course == 'BSCS') ? 'selected' : ''; ?>>BSCS</option>
+                            <option value="BSc(Psych)" <?php echo ($course == 'BSc(Psych)') ? 'selected' : ''; ?>>BSc(Psych)</option>
+                        </select>
+                    </div>
+                    <div class="infield">
+                        <select class="form-control" name="startYear" id="startYear" required>
+                            <option value="" selected hidden disabled>Batch: From Year</option>
+                            <?php
+                            // Get the current year
+                            $currentYear = date('Y');
 
-                        // Number of years to include before and after the current year
-                        $yearRange = 21; // Adjust this number as needed
+                            // Number of years to include before and after the current year
+                            $yearRange = 21; // Adjust this number as needed
 
-                        // Preserve the selected value after form submission
-                        $selectedYear = isset($_POST['startYear']) ? $_POST['startYear'] : '';
+                            // Preserve the selected value after form submission
+                            $selectedYear = isset($_POST['startYear']) ? $_POST['startYear'] : '';
 
-                        // Generate options for years, from current year minus $yearRange to current year plus $yearRange
-                        for ($year = $currentYear - $yearRange; $year <= $currentYear + $yearRange; $year++) {
-                            $selected = ($year == $selectedYear) ? 'selected' : '';
-                            echo "<option value=\"$year\" $selected>$year</option>";
-                        }
-                        ?>
-                    </select>
-                </div>
-                <div class="infield">
-                    <select class="form-control" name="endYear" id="endYear" required data-selected="<?php echo isset($_POST['endYear']) ? $_POST['endYear'] : ''; ?>">
-                        <option value="" selected hidden disabled>Batch: To Year</option>
-                        <?php
-                        if (isset($_POST['startYear'])) {
-                            $startYear = $_POST['startYear'];
-                            $selectedEndYear = isset($_POST['endYear']) ? $_POST['endYear'] : '';
-
-                            // Generate options for endYear starting from startYear + 1
-                            for ($year = $startYear + 1; $year <= $currentYear + $yearRange; $year++) {
-                                $selected = ($year == $selectedEndYear) ? 'selected' : '';
+                            // Generate options for years, from current year minus $yearRange to current year plus $yearRange
+                            for ($year = $currentYear - $yearRange; $year <= $currentYear + $yearRange; $year++) {
+                                $selected = ($year == $selectedYear) ? 'selected' : '';
                                 echo "<option value=\"$year\" $selected>$year</option>";
                             }
-                        }
-                        ?>
-                    </select>
-                </div>
-                <div class="infield">
-                    <input type="number" placeholder="Contact" name="contact" value="<?php echo htmlspecialchars($contact); ?>" required />
-                    <label></label>
-                </div>
-                <div class="infield">
-                    <input type="text" placeholder="Address" name="address" value="<?php echo htmlspecialchars($address); ?>" required />
-                    <label></label>
-                </div>
-                <button type="submit" name="submit">Sign Up</button>
-            </form>
+                            ?>
+                        </select>
+                    </div>
+                    <div class="infield">
+                        <select class="form-control" name="endYear" id="endYear" required data-selected="<?php echo isset($_POST['endYear']) ? $_POST['endYear'] : ''; ?>">
+                            <option value="" selected hidden disabled>Batch: To Year</option>
+                            <?php
+                            if (isset($_POST['startYear'])) {
+                                $startYear = $_POST['startYear'];
+                                $selectedEndYear = isset($_POST['endYear']) ? $_POST['endYear'] : '';
+
+                                // Generate options for endYear starting from startYear + 1
+                                for ($year = $startYear + 1; $year <= $currentYear + $yearRange; $year++) {
+                                    $selected = ($year == $selectedEndYear) ? 'selected' : '';
+                                    echo "<option value=\"$year\" $selected>$year</option>";
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="infield">
+                        <input type="number" placeholder="Contact" name="contact" value="<?php echo htmlspecialchars($contact); ?>" required />
+                        <label></label>
+                    </div>
+                    <div class="infield">
+                        <input type="text" placeholder="Address" name="address" value="<?php echo htmlspecialchars($address); ?>" required />
+                        <label></label>
+                    </div>
+                    <button type="submit" name="submit">Sign Up</button>
+                </form>
         </div>
         <div class="form-container log-in-container">
             <form action="#" method="POST">
@@ -697,6 +696,7 @@ function check_alumni($conn, $table, $log_email, $pass)
 
 
 
+
     <script>
         function togglePasswordVisibility(inputId, toggleId) {
             const passwordInput = document.getElementById(inputId);
@@ -710,11 +710,14 @@ function check_alumni($conn, $table, $log_email, $pass)
             }
         }
 
-        function validatePassword() {
+        function validateForm() {
+            // Get values and elements
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm_password').value;
+            const studentId = document.getElementById('student_id').value;
             const errors = [];
 
+            // Validate password
             if (password.length < 8) {
                 errors.push('Password must be at least 8 characters long.');
             }
@@ -734,10 +737,16 @@ function check_alumni($conn, $table, $log_email, $pass)
                 errors.push('Passwords do not match.');
             }
 
+            // Validate student ID
+            if (!/^\d{9}$/.test(studentId)) {
+                errors.push('Student ID must be exactly 9 digits and contain only numbers.');
+            }
+
+            // Show errors if any
             const errorContainer = document.getElementById('real-time-errors');
             if (errors.length > 0) {
                 errorContainer.innerHTML = errors.join('<br>');
-                errorContainer.classList.add('error-message'); // Add red color
+                errorContainer.classList.add('error-message');
                 return false; // Prevent form submission
             } else {
                 errorContainer.innerHTML = '';
@@ -746,34 +755,6 @@ function check_alumni($conn, $table, $log_email, $pass)
             }
         }
 
-        function validateForm() {
-            return validatePassword();
-        }
-
-
-        function validateForm(form) {
-            const studentId = document.getElementById('student_id').value;
-            if (studentId.length !== 9 || !/^\d{9}$/.test(studentId)) {
-                alert('Student ID must be exactly 9 digits.');
-                return false;
-            }
-
-            return validatePassword();
-        }
-
-        function validateForm(form) {
-            const studentId = document.getElementById('student_id').value;
-            if (!/^\d{9}$/.test(studentId)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Input',
-                    text: 'Student ID must be exactly 9 digits and contain only numbers.'
-                });
-                return false;
-            }
-
-            return validatePassword();
-        }
 
 
         // Handle dynamic end year population
@@ -814,4 +795,4 @@ function check_alumni($conn, $table, $log_email, $pass)
     </script>
 </body>
 
-</html> 1
+</html>
