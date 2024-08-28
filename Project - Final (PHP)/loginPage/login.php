@@ -536,6 +536,7 @@ function check_alumni($conn, $table, $log_email, $pass)
         <div class="form-container sign-up-container">
             <form action="#" method="POST">
                 <h1>Sign Up</h1>
+                <form id="signup-form" onsubmit="return validateForm()">
                 <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
                 <div class="infield">
                     <input type="email" placeholder="Email" name="email" value="<?php echo htmlspecialchars($email); ?>" required />
@@ -713,6 +714,7 @@ function check_alumni($conn, $table, $log_email, $pass)
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm_password').value;
             const errors = [];
+
             if (password.length < 8) {
                 errors.push('Password must be at least 8 characters long.');
             }
@@ -731,13 +733,23 @@ function check_alumni($conn, $table, $log_email, $pass)
             if (password !== confirmPassword) {
                 errors.push('Passwords do not match.');
             }
+
+            const errorContainer = document.getElementById('real-time-errors');
             if (errors.length > 0) {
-                document.getElementById('real-time-errors').innerHTML = errors.join('<br>');
-                return false;
+                errorContainer.innerHTML = errors.join('<br>');
+                errorContainer.classList.add('error-message'); // Add red color
+                return false; // Prevent form submission
+            } else {
+                errorContainer.innerHTML = '';
+                errorContainer.classList.remove('error-message');
+                return true; // Allow form submission
             }
-            document.getElementById('real-time-errors').innerHTML = '';
-            return true;
         }
+
+        function validateForm() {
+            return validatePassword();
+        }
+
 
         function validateForm(form) {
             const studentId = document.getElementById('student_id').value;
