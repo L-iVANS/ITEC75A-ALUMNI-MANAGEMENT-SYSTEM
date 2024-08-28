@@ -814,4 +814,4 @@ function check_alumni($conn, $table, $log_email, $pass)
     </script>
 </body>
 
-</html>
+</html> 1
